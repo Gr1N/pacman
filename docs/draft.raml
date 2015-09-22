@@ -1,0 +1,156 @@
+#%RAML 0.8
+---
+title: "[DRAFT] PacMan enpoints"
+protocols: [ HTTPS ]
+mediaType: application/json
+baseUri: https://pacman.io
+
+securitySchemes:
+  - token: !include security_schemes/token.raml
+traits:
+  - withUserAgent: !include traits/with_user_agent.raml
+# resourceTypes:
+
+/{service}/{user}/{repo}:         # show stats for public repositories
+  /badge:                         # get badge (.svg)
+
+/login:
+  /{service}:
+
+/settings:
+  /profile:                       # name, emails, connect services, delete account
+  /security:                      # (?)
+    /sessions:
+    /history:
+  /tokens:                        # tokens that can be used to access the API (list, create, edit, delete)
+  /repositories:                  # list avaliable repositories, UI for manipulation (enable, disable) and notifications
+
+/api/v1:
+  displayName: PacMan HTTP API
+  description: TBD
+  /repositories:
+    get:
+      description: |
+        Retrieve list of user's repositories.
+      securedBy: [ token ]
+      is: [ withUserAgent ]
+      responses:
+        200:
+          description: |
+            Successfully retrieved list of user's repositories.
+          body:
+            application/json:
+              schema: TBD
+              example: !include examples/api/v1/repositories/get_ok.json
+        404:
+          description: |
+            Repositories not found.
+    put:
+      description: |
+        Update list of user's repositories.
+      securedBy: [ token ]
+      is: [ withUserAgent ]
+      responses:
+        200:
+          description: |
+            Successfully updated list of user's repositories.
+          body:
+            application/json:
+              schema: TBD
+              example: !include examples/api/v1/repositories/put_ok.json
+        409:
+          description: |
+            Can not retrieve list of user's repositories due to errors,
+            e.g.: revoked access to service.
+          body:
+            application/json:
+              schema: TBD
+              example: !include examples/api/v1/repositories/put_conflict.json
+    /{service}:
+      uriParameters:
+        service:
+          description: Specifies allowed service name.
+          enum: [ github ]
+      get:
+        securedBy: [ token ]
+        is: [ withUserAgent ]
+        description: |
+          Retrieve list of user's repositories for specified service.
+        responses:
+          200:
+            description: |
+              Successfully retrieved list of user's repositories
+              for specified service.
+            body:
+              application/json:
+                schema: TBD
+                example: !include examples/api/v1/repositories/service/get_ok.json
+          404:
+            description: |
+              Repositories not found for specified service.
+      put:
+        securedBy: [ token ]
+        is: [ withUserAgent ]
+        description: |
+          Update list of user's repositories for specified service.
+        responses:
+          200:
+            description: |
+              Successfully updated list of user's repositories
+              for specified service.
+            body:
+              application/json:
+                schema: TBD
+                example: !include examples/api/v1/repositories/service/put_ok.json
+          409:
+            description: |
+              Can not retrieve list of user's repositories due to errors,
+              e.g.: revoked access to service.
+            body:
+              application/json:
+                schema: TBD
+                example: !include examples/api/v1/repositories/service/put_conflict.json
+      /{user}/{repo}:
+        get:
+          description: |
+            Retrieve repository dependencies
+          responses:
+            200:
+              description: |
+                Successfully retrieved resource(s)
+        post:
+          description: |
+            Activate repository
+          body:
+            application/json: !!null
+          responses:
+            201:
+              description: |
+                Successfully activated
+              headers:
+                Location:
+                  description: |
+                    Location of the newly created resource
+                  type: string
+                  required: false
+        put:
+          description: |
+            Update repository dependencies
+          body:
+            application/json:
+          responses:
+            204:
+              description: |
+                Successfully updated the resource
+        delete:
+          description: |
+            Deactivate repository
+          responses:
+            204:
+              description: |
+                Successfully deleted resource(s)
+
+        /notifications:
+          /using:
+            /email:
+            /hook:

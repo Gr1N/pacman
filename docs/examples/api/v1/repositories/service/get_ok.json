@@ -1,0 +1,12 @@
+{
+  "1pwd": {
+    "scm": "git",
+    "scope": "public",
+    "action": "monitored"
+  },
+  "copypaste": {
+    "scm": "git",
+    "scope": "public",
+    "action": "disabled"
+  }
+}
