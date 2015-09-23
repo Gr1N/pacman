@@ -1,0 +1,16 @@
+{
+  "python": {
+    "Django": {
+      "requirement": ">=1.6.0",
+      "url": "...",
+      "license": "...",
+      "versions": {
+        "1.6.0": {
+          "changelog": "...",
+          ...
+        },
+        ...
+      }
+    }
+  }
+}

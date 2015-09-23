@@ -28,6 +28,34 @@ traits:
 /api/v1:
   displayName: PacMan HTTP API
   description: TBD
+  /packages:
+    /{language}:
+      uriParameters:
+        language:
+          description: Specifies allowed language.
+          enum: [ python, javascript ]
+      /{name}:
+        uriParameters:
+          name:
+            description: Package name.
+            type: string
+            example: Django
+        get:
+          description: |
+            Retrieve package information.
+          is: [ withUserAgent ]
+          responses:
+            200:
+              description: |
+                Successfully retrieved package information.
+              body:
+                application/json:
+                  schema: TBD
+                  example: !include examples/api/v1/packages/language/name/get_ok.json
+            404:
+              description: |
+                Package not found.
+
   /repositories:
     get:
       description: |
@@ -110,81 +138,83 @@ traits:
               application/json:
                 schema: TBD
                 example: !include examples/api/v1/repositories/service/put_conflict.json
-      /{user}/{repo}:
+      /{user}:
         uriParameters:
           user:
             description: User name on specified service.
             type: string
             example: Gr1N
-          repo:
-            description: Repository name on specified service.
-            type: string
-            example: 1pwd
-        get:
-          securedBy: [ null, token ]
-          is: [ withUserAgent ]
-          description: |
-            Retrieve repository dependencies. (!) Only owner of a private
-            repository can get information about it.
-          responses:
-            200:
-              description: |
-                Successfully retrieved repository dependencies.
-              body:
-                application/json:
-                  schema: TBD
-                  example: TBD
-            404:
-              description: |
-                Repository not found.
-        post:
-          securedBy: [ token ]
-          is: [ withUserAgent ]
-          description: |
-            Activate monitoring for specified repository.
-          responses:
-            201:
-              description: |
-                Monitoring successfully activated.
-              headers:
-                Location:
-                  description: |
-                    Location of the public repository page.
-                  type: string
-                  example: https://pacman.io/github/Gr1N/1pwd/
-            404:
-              description: |
-                Repository not found.
-        put:
-          securedBy: [ token ]
-          is: [ withUserAgent ]
-          description: |
-            Update repository dependencies.
-          responses:
-            200:
-              description: |
-                Successfully updated repository dependencies.
-              body:
-                application/json:
-                  schema: TBD
-                  example: TBD
-            404:
-              description: |
-                Repository not found.
-        delete:
-          securedBy: [ token ]
-          is: [ withUserAgent ]
-          description: |
-            Deactivate monitoring for specified repository.
-          responses:
-            204:
-              description: |
-                Monitoring successfully deactivated.
-            404:
-              description: |
-                Repository not found.
+        /{repo}:
+          uriParameters:
+            repo:
+              description: Repository name on specified service.
+              type: string
+              example: 1pwd
+          get:
+            securedBy: [ null, token ]
+            is: [ withUserAgent ]
+            description: |
+              Retrieve repository dependencies. (!) Only owner of a private
+              repository can get information about it.
+            responses:
+              200:
+                description: |
+                  Successfully retrieved repository dependencies.
+                body:
+                  application/json:
+                    schema: TBD
+                    example: !include examples/api/v1/repositories/service/user/repo/get_ok.json
+              404:
+                description: |
+                  Repository not found.
+          post:
+            securedBy: [ token ]
+            is: [ withUserAgent ]
+            description: |
+              Activate monitoring for specified repository.
+            responses:
+              201:
+                description: |
+                  Monitoring successfully activated.
+                headers:
+                  Location:
+                    description: |
+                      Location of the public repository page.
+                    type: string
+                    example: https://pacman.io/github/Gr1N/1pwd/
+              404:
+                description: |
+                  Repository not found.
+          put:
+            securedBy: [ token ]
+            is: [ withUserAgent ]
+            description: |
+              Update repository dependencies.
+            responses:
+              200:
+                description: |
+                  Successfully updated repository dependencies.
+                body:
+                  application/json:
+                    schema: TBD
+                    example: !include examples/api/v1/repositories/service/user/repo/put_ok.json
+              404:
+                description: |
+                  Repository not found.
+          delete:
+            securedBy: [ token ]
+            is: [ withUserAgent ]
+            description: |
+              Deactivate monitoring for specified repository.
+            responses:
+              204:
+                description: |
+                  Monitoring successfully deactivated.
+              404:
+                description: |
+                  Repository not found.
 
-        /notifications:
-          /using:
-            /email:
-            /hook:
+          /notifications:
+            /using:
+              /email:
+              /hook:
