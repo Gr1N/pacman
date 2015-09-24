@@ -28,6 +28,7 @@ traits:
 /api/v1:
   displayName: PacMan HTTP API
   description: TBD
+
   /packages:
     /{language}:
       uriParameters:
@@ -214,7 +215,81 @@ traits:
                 description: |
                   Repository not found.
 
-          /notifications:
-            /using:
-              /email:
-              /hook:
+  /notifications:
+    get:
+      description: |
+        Retrieve list of active notifications.
+      securedBy: [ token ]
+      is: [ withUserAgent ]
+      responses:
+        200:
+          description: |
+            Successfully retrieved list of active notifications.
+          body:
+            application/json:
+              schema: TBD
+              example: TBD
+    /email:
+      get:
+        description: |
+          Retrieve status of email notifications.
+        securedBy: [ token ]
+        is: [ withUserAgent ]
+        responses:
+          200:
+            description: |
+              Successfully retrieved status of email notifications.
+            body:
+              application/json:
+                schema: TBD
+                example: TBD
+      post:
+        description: |
+          Enable notifications using email.
+        securedBy: [ token ]
+        is: [ withUserAgent ]
+        responses:
+          201:
+            description: |
+              Notifications using email successfully enabled.
+      delete:
+        description: |
+          Disable notifications using email.
+        securedBy: [ token ]
+        is: [ withUserAgent ]
+        responses:
+          204:
+            description: |
+              Notifications using email successfully disabled.
+    /pullrequest:
+      get:
+        description: |
+          Retrieve status of pullrequests notifications.
+        securedBy: [ token ]
+        is: [ withUserAgent ]
+        responses:
+          200:
+            description: |
+              Successfully retrieved status of pullrequests notifications.
+            body:
+              application/json:
+                schema: TBD
+                example: TBD
+      post:
+        description: |
+          Enable notifications using pullrequests.
+        securedBy: [ token ]
+        is: [ withUserAgent ]
+        responses:
+          201:
+            description: |
+              Notifications using pullrequests successfully enabled.
+      delete:
+        description: |
+          Disable notifications using pullrequests.
+        securedBy: [ token ]
+        is: [ withUserAgent ]
+        responses:
+          204:
+            description: |
+              Notifications using pullrequests successfully disabled.
