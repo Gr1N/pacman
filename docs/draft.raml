@@ -11,8 +11,38 @@ traits:
   - withUserAgent: !include traits/with_user_agent.raml
 # resourceTypes:
 
-/{service}/{user}/{repo}:         # show stats for public repositories
-  /badge:                         # get badge (.svg)
+/{service}/{user}/{repo}:
+  displayName: Repositories and stats
+  description: |
+    Show repositories stats. Private repositories are displayed only for
+    the authenticated owner.
+  uriParameters:
+    service:
+      description: Specifies allowed service name.
+      enum: [ github ]
+    user:
+      description: User name on specified service.
+      type: string
+      example: Gr1N
+    repo:
+      description: Repository name on specified service.
+      type: string
+      example: 1pwd
+  get:
+    description: |
+      Show repository page.
+    responses:
+      200:
+        description: |
+          TBD
+  /badge:
+    get:
+      description: |
+        Get status badge of repository.
+      responses:
+        200:
+          description: |
+            TBD
 
 /login:
   displayName: Authentication
