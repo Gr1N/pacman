@@ -15,7 +15,63 @@ traits:
   /badge:                         # get badge (.svg)
 
 /login:
+  displayName: Authentication
+  description: TBD
   /{service}:
+    uriParameters:
+      service:
+        description: Specifies allowed service name.
+        enum: [ github ]
+    post:
+      description: |
+        Start authentication using specified service.
+      body:
+        application/json: !!null
+      responses:
+        302:
+          description: |
+            Redirect to specified service for authorization.
+          headers:
+            Location:
+              description: |
+                Location of the redirection.
+              type: string
+              required: true
+        400:
+          description: |
+            Bad request, e.g.: invalid request parameters.
+          body:
+            application/json:
+              schema: TBD
+              example: TBD
+    /handle:
+      get:
+        description: |
+          Handle redirect from specified service and complete authentication.
+        responses:
+          302:
+            description: |
+              Successfully authenticated, redirect to index (or prev) page.
+            headers:
+              Location:
+                description: |
+                  Location of the redirection.
+                type: string
+                required: true
+          400:
+            description: |
+              Bad request, e.g.: invalid request parameters.
+            body:
+              application/json:
+                schema: TBD
+                example: TBD
+          409:
+            description: |
+              Conflict, e.g.: TBD
+            body:
+              application/json:
+                schema: TBD
+                example: TBD
 
 /settings:
   /profile:                       # name, emails, connect services, delete account
