@@ -23,6 +23,11 @@ _testmain.go
 *.test
 *.prof
 
+# Revel
+test-results/
+tmp/
+routes/
+
 # Other
 *sublime*
 docs/draft.html
