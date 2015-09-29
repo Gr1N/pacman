@@ -6,6 +6,9 @@ module:testrunner
 
 GET     /                                       App.Index
 
+# Auth
+GET     /login                                  Auth.Login
+
 # Ignore favicon requests
 GET     /favicon.ico                            404
 
