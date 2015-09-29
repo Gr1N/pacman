@@ -1,4 +1,4 @@
-package modules
+package oauth2
 
 import (
 	"bytes"
@@ -19,20 +19,6 @@ type Endpoint struct {
 	AuthUrl  string
 	TokenUrl string
 }
-
-var (
-	GitHub = &Config{
-		ClientID:     "fake",
-		ClientSecret: "fake",
-		RedirectUrl:  "http://localhost",
-		Scopes:       []string{},
-
-		Endpoint: Endpoint{
-			AuthUrl:  "https://github.com/login/oauth/authorize",
-			TokenUrl: "https://github.com/login/oauth/access_token",
-		},
-	}
-)
 
 func (c *Config) AuthCodeUrl(state string) string {
 	var buf bytes.Buffer

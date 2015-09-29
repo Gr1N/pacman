@@ -3,7 +3,7 @@ package controllers
 import (
 	"github.com/revel/revel"
 
-	"github.com/Gr1N/pacman/app/modules"
+	"github.com/Gr1N/pacman/app/modules/oauth2"
 )
 
 type Auth struct {
@@ -11,5 +11,5 @@ type Auth struct {
 }
 
 func (c Auth) Login() revel.Result {
-	return c.Redirect(modules.GitHub.AuthCodeUrl("state"))
+	return c.Redirect(oauth2.GitHub.AuthCodeUrl("state"))
 }
