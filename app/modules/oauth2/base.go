@@ -20,7 +20,7 @@ type Endpoint struct {
 	TokenUrl string
 }
 
-func (c *Config) AuthCodeUrl(state string) string {
+func (c Config) AuthCodeUrl(state string) string {
 	var buf bytes.Buffer
 
 	v := url.Values{
