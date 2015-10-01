@@ -1,7 +1,9 @@
 package controllers
 
 import (
+	"bytes"
 	"regexp"
+	"strings"
 
 	"github.com/revel/revel"
 
@@ -14,15 +16,32 @@ type Auth struct {
 }
 
 var (
-	allowedServices = regexp.MustCompile("^(github)$")
+	servicesAllowed *regexp.Regexp
 )
+
+func init() {
+	revel.OnAppStart(initAuth)
+}
+
+func initAuth() {
+	var buf bytes.Buffer
+
+	servicesRaw, _ := revel.Config.String("auth.services")
+	services := strings.Split(servicesRaw, ",")
+
+	buf.WriteString("^(")
+	buf.WriteString(strings.Join(services, "|"))
+	buf.WriteString(")$")
+
+	servicesAllowed = regexp.MustCompile(buf.String())
+}
 
 func (c Auth) Index() revel.Result {
 	return c.Render()
 }
 
 func (c Auth) Login(service string) revel.Result {
-	c.Validation.Match(service, allowedServices)
+	c.Validation.Match(service, servicesAllowed)
 
 	if c.Validation.HasErrors() {
 		revel.INFO.Printf("Got not supported service name (%s)", service)
