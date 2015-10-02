@@ -1,9 +1,10 @@
 package oauth2
 
 import (
-	"bytes"
 	"net/url"
 	"strings"
+
+	"github.com/Gr1N/pacman/app/modules/helpers"
 )
 
 type Config struct {
@@ -21,8 +22,6 @@ type Endpoint struct {
 }
 
 func (c Config) AuthCodeUrl(state string) string {
-	var buf bytes.Buffer
-
 	v := url.Values{
 		"response_type": {"code"},
 		"client_id":     {c.ClientID},
@@ -31,9 +30,5 @@ func (c Config) AuthCodeUrl(state string) string {
 		"state":         {state},
 	}
 
-	buf.WriteString(c.Endpoint.AuthUrl)
-	buf.WriteString("?")
-	buf.WriteString(v.Encode())
-
-	return buf.String()
+	return helpers.JoinStrings(c.Endpoint.AuthUrl, "?", v.Encode())
 }

@@ -1,11 +1,12 @@
 package controllers
 
 import (
-	"bytes"
 	"regexp"
 	"strings"
+	"time"
 
 	"github.com/revel/revel"
+	"github.com/revel/revel/cache"
 
 	"github.com/Gr1N/pacman/app/modules/helpers"
 	"github.com/Gr1N/pacman/app/modules/oauth2"
@@ -16,7 +17,8 @@ type Auth struct {
 }
 
 var (
-	servicesAllowed *regexp.Regexp
+	servicesAllowed      *regexp.Regexp
+	servicesCacheTimeout time.Duration
 )
 
 func init() {
@@ -24,16 +26,13 @@ func init() {
 }
 
 func initAuth() {
-	var buf bytes.Buffer
-
 	servicesRaw, _ := revel.Config.String("auth.services")
 	services := strings.Split(servicesRaw, ",")
+	servicesAllowed = regexp.MustCompile(
+		helpers.JoinStrings("^(", strings.Join(services, "|"), ")$"))
 
-	buf.WriteString("^(")
-	buf.WriteString(strings.Join(services, "|"))
-	buf.WriteString(")$")
-
-	servicesAllowed = regexp.MustCompile(buf.String())
+	servicesCacheTimeoutRaw, _ := revel.Config.String("auth.services.cache.timeout")
+	servicesCacheTimeout, _ = time.ParseDuration(servicesCacheTimeoutRaw)
 }
 
 func (c Auth) Index() revel.Result {
@@ -53,7 +52,8 @@ func (c Auth) Login(service string) revel.Result {
 	}
 	state := helpers.RandomString(32)
 
-	// TODO: Store state per service and user
+	cacheKey := helpers.JoinStrings(service, ":", state)
+	go cache.Set(c.Session.Id(), cacheKey, servicesCacheTimeout)
 
 	return c.Redirect(services[service].AuthCodeUrl(state))
 }

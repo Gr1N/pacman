@@ -1,6 +1,7 @@
 package helpers
 
 import (
+	"bytes"
 	"math/rand"
 	"time"
 )
@@ -18,4 +19,14 @@ func RandomString(n int) string {
 	}
 
 	return string(result)
+}
+
+func JoinStrings(strings ...string) string {
+	var buf bytes.Buffer
+
+	for _, s := range strings {
+		buf.WriteString(s)
+	}
+
+	return buf.String()
 }
