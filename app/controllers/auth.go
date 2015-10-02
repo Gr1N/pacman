@@ -39,11 +39,16 @@ func (c Auth) Index() revel.Result {
 	return c.Render()
 }
 
-func (c Auth) Login(service string) revel.Result {
-	c.Validation.Match(service, servicesAllowed)
+func (c Auth) IndexEnd(service string) revel.Result {
+	if !serviceAllowed(service, c.Validation) {
+		return c.Redirect(Auth.Index)
+	}
 
-	if c.Validation.HasErrors() {
-		revel.INFO.Printf("Got not supported service name (%s)", service)
+	return c.Render()
+}
+
+func (c Auth) Login(service string) revel.Result {
+	if !serviceAllowed(service, c.Validation) {
 		return c.Redirect(Auth.Index)
 	}
 
@@ -56,4 +61,15 @@ func (c Auth) Login(service string) revel.Result {
 	go cache.Set(c.Session.Id(), cacheKey, servicesCacheTimeout)
 
 	return c.Redirect(services[service].AuthCodeUrl(state))
+}
+
+func serviceAllowed(service string, v *revel.Validation) bool {
+	v.Match(service, servicesAllowed)
+
+	if v.HasErrors() {
+		revel.INFO.Printf("Got not supported service name (%s)", service)
+		return false
+	}
+
+	return true
 }
