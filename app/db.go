@@ -28,7 +28,10 @@ func InitDB() {
 		revel.ERROR.Fatal("No db.spec found.")
 	}
 
-	// Initializae `gorm`
+	maxIdleConns := revel.Config.IntDefault("db.max_idle_conns", 10)
+	maxOpenConns := revel.Config.IntDefault("db.max_open_conns", 100)
+
+	// Initialize `gorm`
 	dbm, err := gorm.Open(driver, spec)
 	if err != nil {
 		revel.ERROR.Fatal(err)
@@ -37,8 +40,8 @@ func InitDB() {
 	DB = &dbm
 
 	dbm.DB().Ping()
-	dbm.DB().SetMaxIdleConns(10)
-	dbm.DB().SetMaxOpenConns(100)
+	dbm.DB().SetMaxIdleConns(maxIdleConns)
+	dbm.DB().SetMaxOpenConns(maxOpenConns)
 	dbm.SingularTable(true)
 
 	// Migrate
