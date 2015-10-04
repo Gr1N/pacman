@@ -57,8 +57,8 @@ func (c Auth) Login(service string) revel.Result {
 	}
 	state := helpers.RandomString(32)
 
-	cacheKey := helpers.JoinStrings(service, ":", state)
-	go cache.Set(c.Session.Id(), cacheKey, servicesCacheTimeout)
+	key := helpers.JoinStrings(c.Session.Id(), ":", service)
+	go cache.Set(key, state, servicesCacheTimeout)
 
 	return c.Redirect(services[service].AuthCodeUrl(state))
 }
