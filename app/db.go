@@ -32,6 +32,7 @@ func InitDB() {
 	maxIdleConns := revel.Config.IntDefault("db.max_idle_conns", 10)
 	maxOpenConns := revel.Config.IntDefault("db.max_open_conns", 100)
 	singularTable := revel.Config.BoolDefault("db.singular_table", true)
+	logMode := revel.Config.BoolDefault("db.log_mode", false)
 
 	// Initialize `gorm`
 	dbm, err := gorm.Open(driver, spec)
@@ -45,6 +46,7 @@ func InitDB() {
 	dbm.DB().SetMaxIdleConns(maxIdleConns)
 	dbm.DB().SetMaxOpenConns(maxOpenConns)
 	dbm.SingularTable(singularTable)
+	dbm.LogMode(logMode)
 
 	// Migrate
 	dbm.AutoMigrate(&models.User{})
