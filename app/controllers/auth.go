@@ -45,7 +45,7 @@ func (c Auth) Index() revel.Result {
 }
 
 func (c Auth) IndexEnd(service string) revel.Result {
-	if !serviceAllowed(service, c.Validation) {
+	if !serviceValid(service, c.Validation) {
 		return c.Redirect(Auth.Index)
 	}
 
@@ -53,7 +53,7 @@ func (c Auth) IndexEnd(service string) revel.Result {
 }
 
 func (c Auth) Login(service string) revel.Result {
-	if !serviceAllowed(service, c.Validation) {
+	if !serviceValid(service, c.Validation) {
 		return c.Redirect(Auth.Index)
 	}
 
@@ -66,7 +66,8 @@ func (c Auth) Login(service string) revel.Result {
 }
 
 func (c Auth) LoginEnd(service string) revel.Result {
-	if !serviceAllowed(service, c.Validation) {
+	// TODO: handle OAuth2.0 cancel response
+	if !serviceValid(service, c.Validation) {
 		return c.Redirect(Auth.Index)
 	}
 
@@ -78,7 +79,12 @@ func (c Auth) LoginEnd(service string) revel.Result {
 	c.Params.Bind(&state, "state")
 	c.Params.Bind(&code, "code")
 
-	if !serviceStateAllowed(service, c.Session.Id(), state, c.Validation) {
+	if !serviceStateValid(service, c.Session.Id(), state, c.Validation) {
+		// TODO: show error?
+		return c.Redirect(Auth.Index)
+	}
+
+	if !serviceCodeValid(service, code, c.Validation) {
 		// TODO: show error?
 		return c.Redirect(Auth.Index)
 	}
@@ -86,7 +92,7 @@ func (c Auth) LoginEnd(service string) revel.Result {
 	return c.Redirect(Auth.Index)
 }
 
-func serviceAllowed(service string, v *revel.Validation) bool {
+func serviceValid(service string, v *revel.Validation) bool {
 	v.Match(service, servicesAllowed)
 
 	if v.HasErrors() {
@@ -97,11 +103,7 @@ func serviceAllowed(service string, v *revel.Validation) bool {
 	return true
 }
 
-func serviceCacheKey(service, sessionId string) string {
-	return helpers.JoinStrings(sessionId, ":", service)
-}
-
-func serviceStateAllowed(service, sessionId, state string, v *revel.Validation) bool {
+func serviceStateValid(service, sessionId, state string, v *revel.Validation) bool {
 	v.Required(state)
 	v.Length(state, 32)
 
@@ -127,4 +129,20 @@ func serviceStateAllowed(service, sessionId, state string, v *revel.Validation) 
 	}
 
 	return true
+}
+
+func serviceCodeValid(service, code string, v *revel.Validation) bool {
+	v.Required(code)
+	v.Length(code, 20)
+
+	if v.HasErrors() {
+		revel.INFO.Printf("Got invalid code (%s) value", code)
+		return false
+	}
+
+	return true
+}
+
+func serviceCacheKey(service, sessionId string) string {
+	return helpers.JoinStrings(sessionId, ":", service)
 }
