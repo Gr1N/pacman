@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"crypto/subtle"
 	"regexp"
 	"strings"
 	"time"
@@ -18,6 +19,7 @@ type Auth struct {
 
 var (
 	servicesAllowed      *regexp.Regexp
+	servicesSupported    map[string]*oauth2.Config
 	servicesCacheTimeout time.Duration
 )
 
@@ -30,6 +32,9 @@ func initAuth() {
 	services := strings.Split(servicesRaw, ",")
 	servicesAllowed = regexp.MustCompile(
 		helpers.JoinStrings("^(", strings.Join(services, "|"), ")$"))
+	servicesSupported = map[string]*oauth2.Config{
+		"github": oauth2.GitHub,
+	}
 
 	servicesCacheTimeoutRaw, _ := revel.Config.String("auth.services.cache.timeout")
 	servicesCacheTimeout, _ = time.ParseDuration(servicesCacheTimeoutRaw)
@@ -52,15 +57,33 @@ func (c Auth) Login(service string) revel.Result {
 		return c.Redirect(Auth.Index)
 	}
 
-	services := map[string]*oauth2.Config{
-		"github": oauth2.GitHub,
-	}
 	state := helpers.RandomString(32)
 
-	key := helpers.JoinStrings(c.Session.Id(), ":", service)
+	key := serviceCacheKey(service, c.Session.Id())
 	go cache.Set(key, state, servicesCacheTimeout)
 
-	return c.Redirect(services[service].AuthCodeUrl(state))
+	return c.Redirect(servicesSupported[service].AuthCodeUrl(state))
+}
+
+func (c Auth) LoginEnd(service string) revel.Result {
+	if !serviceAllowed(service, c.Validation) {
+		return c.Redirect(Auth.Index)
+	}
+
+	var (
+		state string
+		code  string
+	)
+
+	c.Params.Bind(&state, "state")
+	c.Params.Bind(&code, "code")
+
+	if !serviceStateAllowed(service, c.Session.Id(), state, c.Validation) {
+		// TODO: show error?
+		return c.Redirect(Auth.Index)
+	}
+
+	return c.Redirect(Auth.Index)
 }
 
 func serviceAllowed(service string, v *revel.Validation) bool {
@@ -68,6 +91,38 @@ func serviceAllowed(service string, v *revel.Validation) bool {
 
 	if v.HasErrors() {
 		revel.INFO.Printf("Got not supported service name (%s)", service)
+		return false
+	}
+
+	return true
+}
+
+func serviceCacheKey(service, sessionId string) string {
+	return helpers.JoinStrings(sessionId, ":", service)
+}
+
+func serviceStateAllowed(service, sessionId, state string, v *revel.Validation) bool {
+	v.Required(state)
+	v.Length(state, 32)
+
+	if v.HasErrors() {
+		revel.INFO.Printf("Got invalid state (%s) value", state)
+		return false
+	}
+
+	var cachedState string
+
+	key := serviceCacheKey(service, sessionId)
+	if err := cache.Get(key, &cachedState); err != nil {
+		revel.INFO.Printf("Cached state value not found for key (%s)", key)
+		return false
+	}
+
+	go cache.Delete(key)
+
+	if eq := subtle.ConstantTimeCompare([]byte(state), []byte(cachedState)); eq != 1 {
+		revel.INFO.Printf("State (%s) from request and cached state (%s) not equal",
+			state, cachedState)
 		return false
 	}
 

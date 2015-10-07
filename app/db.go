@@ -31,7 +31,7 @@ func InitDB() {
 
 	maxIdleConns := revel.Config.IntDefault("db.max_idle_conns", 10)
 	maxOpenConns := revel.Config.IntDefault("db.max_open_conns", 100)
-	singularTable := revel.Config.BoolDefault("db.singular_table", true)
+	singularTable := revel.Config.BoolDefault("db.singular_table", false)
 	logMode := revel.Config.BoolDefault("db.log_mode", false)
 
 	// Initialize `gorm`

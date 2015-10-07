@@ -1,1 +1,25 @@
-Index
+{{set . "title" "Login"}}
+{{template "header.html" .}}
+
+<header class="hero-unit" style="background-color:#A9F16C">
+  <div class="container">
+    <div class="row">
+      <div class="hero-text">
+        <h1>Login!</h1>
+        <p></p>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+  <div class="row">
+    <div class="span6">
+      <form method="POST" action="/login/github/">
+        <input value="GitHub" type="submit">
+      </form>
+    </div>
+  </div>
+</div>
+
+{{template "footer.html" .}}

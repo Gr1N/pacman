@@ -14,7 +14,9 @@ end_of_line = lf
 trim_trailing_whitespace = true
 insert_final_newline = true
 
-[*.{ini,raml,json}]
+[*.go]
+indent_style = tab
+
+[*.{ini,raml,json,html}]
 indent_style = space
 indent_size = 2
-

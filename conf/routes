@@ -10,7 +10,7 @@ GET     /                                       App.Index
 GET     /login                                  Auth.Index
 POST    /login/:service                         Auth.Login
 GET     /login/:service/end                     Auth.IndexEnd
-#POST    /login/:service/end                     Auth.LoginEnd
+POST    /login/:service/end                     Auth.LoginEnd
 
 # Ignore favicon requests
 GET     /favicon.ico                            404
