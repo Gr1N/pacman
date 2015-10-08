@@ -29,6 +29,7 @@ func initGitHub() {
 		Endpoint: Endpoint{
 			AuthUrl:  "https://github.com/login/oauth/authorize",
 			TokenUrl: "https://github.com/login/oauth/access_token",
+			UserUrl:  "https://api.github.com/user",
 		},
 	}
 }

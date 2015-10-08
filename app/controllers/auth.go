@@ -79,15 +79,13 @@ func (c Auth) LoginEnd(service string) revel.Result {
 	c.Params.Bind(&state, "state")
 	c.Params.Bind(&code, "code")
 
-	if !serviceStateValid(service, c.Session.Id(), state, c.Validation) {
+	stateValid := serviceStateValid(service, c.Session.Id(), state, c.Validation)
+	codeValid := serviceCodeValid(service, code, c.Validation)
+	if !stateValid || !codeValid {
 		// TODO: show error?
 		return c.Redirect(Auth.Index)
 	}
 
-	if !serviceCodeValid(service, code, c.Validation) {
-		// TODO: show error?
-		return c.Redirect(Auth.Index)
-	}
 
 	return c.Redirect(Auth.Index)
 }
