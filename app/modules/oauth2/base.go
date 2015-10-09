@@ -12,11 +12,6 @@ import (
 	"github.com/Gr1N/pacman/app/modules/helpers"
 )
 
-type OAuthService interface {
-	AuthCodeUrl(state string) string
-	Exhange(code string) *Token
-}
-
 type Config struct {
 	ClientId     string
 	ClientSecret string
@@ -38,10 +33,22 @@ type Token struct {
 	Scopes []string
 }
 
+type User struct {
+	Id    int64
+	Name  string
+	Email string
+}
+
 type tokenJSON struct {
 	Access string `json:"access_token"`
 	Type   string `json:"token_type"`
 	Scope  string `json:"scope"`
+}
+
+type userJSON struct {
+	Id    int64  `json:"id"`
+	Name  string `json:"login"`
+	Email string `json:"email"`
 }
 
 func (c Config) AuthCodeUrl(state string) string {
@@ -95,5 +102,37 @@ func (c Config) Exchange(code string) *Token {
 		Access: tj.Access,
 		Type:   tj.Type,
 		Scopes: strings.Split(tj.Scope, ","),
+	}
+}
+
+func (c Config) User(token *Token) *User {
+	resp, err := goreq.Request{
+		Method: "GET",
+		Uri:    c.Endpoint.UserUrl,
+		Accept: "application/json",
+	}.WithHeader("Authorization", helpers.JoinStrings("token", " ", token.Access)).Do()
+	if err != nil {
+		revel.ERROR.Printf("Got error (%v), while fetching user data", err)
+		return nil
+	}
+
+	defer resp.Body.Close()
+
+	if status := resp.StatusCode; status != http.StatusOK {
+		revel.ERROR.Printf("Got unexpected status (%v) while user data", status)
+		return nil
+	}
+
+	var uj userJSON
+
+	if err := resp.Body.FromJsonTo(&uj); err != nil || uj.Id == 0 {
+		revel.ERROR.Printf("User Id not found in response")
+		return nil
+	}
+
+	return &User{
+		Id:    uj.Id,
+		Name:  uj.Name,
+		Email: uj.Email,
 	}
 }
