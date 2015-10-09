@@ -8,8 +8,6 @@ import (
 	"github.com/franela/goreq"
 
 	"github.com/revel/revel"
-
-	"github.com/Gr1N/pacman/app/modules/helpers"
 )
 
 type Config struct {
@@ -60,7 +58,10 @@ func (c Config) AuthCodeUrl(state string) string {
 		"state":         {state},
 	}
 
-	return helpers.JoinStrings(c.Endpoint.AuthUrl, "?", v.Encode())
+	return strings.Join([]string{
+		c.Endpoint.AuthUrl,
+		v.Encode(),
+	}, "?")
 }
 
 func (c Config) Exchange(code string) *Token {
@@ -106,11 +107,15 @@ func (c Config) Exchange(code string) *Token {
 }
 
 func (c Config) User(token *Token) *User {
+	authorization := strings.Join([]string{
+		"token",
+		token.Access,
+	}, " ")
 	resp, err := goreq.Request{
 		Method: "GET",
 		Uri:    c.Endpoint.UserUrl,
 		Accept: "application/json",
-	}.WithHeader("Authorization", helpers.JoinStrings("token", " ", token.Access)).Do()
+	}.WithHeader("Authorization", authorization).Do()
 	if err != nil {
 		revel.ERROR.Printf("Got error (%v), while fetching user data", err)
 		return nil

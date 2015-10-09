@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"crypto/subtle"
+	"fmt"
 	"regexp"
 	"strings"
 	"time"
@@ -30,8 +31,9 @@ func init() {
 func initAuth() {
 	servicesRaw, _ := revel.Config.String("auth.services")
 	services := strings.Split(servicesRaw, ",")
+
 	servicesAllowed = regexp.MustCompile(
-		helpers.JoinStrings("^(", strings.Join(services, "|"), ")$"))
+		fmt.Sprintf("^(%v)$", strings.Join(services, "|")))
 	servicesSupported = map[string]*oauth2.Config{
 		"github": oauth2.GitHub,
 	}
@@ -142,5 +144,8 @@ func serviceCodeValid(service, code string, v *revel.Validation) bool {
 }
 
 func serviceCacheKey(service, sessionId string) string {
-	return helpers.JoinStrings(sessionId, ":", service)
+	return strings.Join([]string{
+		sessionId,
+		service,
+	}, ":")
 }
