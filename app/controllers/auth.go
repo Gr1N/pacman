@@ -6,6 +6,7 @@ import (
 	"github.com/revel/revel"
 
 	"github.com/Gr1N/pacman/app/modules/auth"
+	"github.com/Gr1N/pacman/app/routes"
 )
 
 type Auth struct {
@@ -18,7 +19,7 @@ type Authd struct {
 
 func (c Auth) checkAuthentication() revel.Result {
 	if user := c.withUser(); user != nil {
-		return c.Redirect(Application.Index)
+		return c.Redirect(routes.Application.Index())
 	}
 
 	return nil
@@ -30,7 +31,7 @@ func (c Auth) Index() revel.Result {
 
 func (c Auth) IndexEnd(service string) revel.Result {
 	if !auth.ServiceEnabled(service, c.Validation) {
-		return c.Redirect(Auth.Index)
+		return c.Redirect(routes.Auth.Index())
 	}
 
 	return c.Render()
@@ -38,7 +39,7 @@ func (c Auth) IndexEnd(service string) revel.Result {
 
 func (c Auth) Login(service string) revel.Result {
 	if !auth.ServiceEnabled(service, c.Validation) {
-		return c.Redirect(Auth.Index)
+		return c.Redirect(routes.Auth.Index())
 	}
 
 	state := auth.IssueState(service, c.Session.Id())
@@ -48,7 +49,7 @@ func (c Auth) Login(service string) revel.Result {
 func (c Auth) LoginEnd(service string) revel.Result {
 	// TODO: handle OAuth2.0 cancel response
 	if !auth.ServiceEnabled(service, c.Validation) {
-		return c.Redirect(Auth.Index)
+		return c.Redirect(routes.Auth.Index())
 	}
 
 	var (
@@ -63,24 +64,24 @@ func (c Auth) LoginEnd(service string) revel.Result {
 	codeValid := auth.CodeValid(service, code, c.Validation)
 	if !stateValid || !codeValid {
 		// TODO: handle error
-		return c.Redirect(Auth.Index)
+		return c.Redirect(routes.Auth.Index())
 	}
 
 	user, found := auth.FindOrCreateUserUsingService(service, code, c.Txn)
 	if !found {
 		// TODO: handle error
-		return c.Redirect(Auth.Index)
+		return c.Redirect(routes.Auth.Index())
 	}
 
 	flushSession(c.Session)
 	c.Session["user_id"] = strconv.FormatInt(user.Id, 10)
 
-	return c.Redirect(Application.Index)
+	return c.Redirect(routes.Application.Index())
 }
 
 func (c Authd) Logout() revel.Result {
 	flushSession(c.Session)
-	return c.Redirect(Application.Index)
+	return c.Redirect(routes.Application.Index())
 }
 
 func flushSession(session revel.Session) {
