@@ -1,11 +1,17 @@
 package models
 
-import (
-	"time"
-)
-
 type User struct {
-	Id        int64 `gorm:"primary_key"`
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	Model
+
+	Services []Service
+}
+
+type Service struct {
+	Model
+
+	UserId int64 `sql:"not null;unique_index:idx_userid_userserviceid"`
+
+	UserServiceId int64 `sql:"not null;unique_index:idx_userid_userserviceid"`
+	Name          string
+	Email         string
 }

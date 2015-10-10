@@ -49,5 +49,5 @@ func InitDB() {
 	dbm.LogMode(logMode)
 
 	// Migrate
-	dbm.AutoMigrate(&models.User{})
+	dbm.AutoMigrate(&models.User{}, &models.Service{})
 }
