@@ -5,11 +5,13 @@ import (
 
 	"github.com/revel/revel"
 
+	gorm "github.com/Gr1N/revel-gorm/app/controllers"
+
 	"github.com/Gr1N/pacman/app/models"
 )
 
 type Application struct {
-	TransactionalController
+	gorm.TransactionalController
 }
 
 func (c Application) tryAuthenticate() revel.Result {
