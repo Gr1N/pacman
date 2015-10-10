@@ -40,15 +40,15 @@ func makeStateCacheKey(service, sessionId string) string {
 	}, ":")
 }
 
-func FindOrCreateUserUsingService(service, code string, txn *gorm.DB) (models.User, bool) {
+func FindOrCreateUserUsingService(service, code string, txn *gorm.DB) (*models.User, bool) {
 	token := SupportedServices[service].Exchange(code)
 	if token == nil {
-		return models.User{}, false
+		return &models.User{}, false
 	}
 
 	externalUser := SupportedServices[service].User(token)
 	if externalUser == nil {
-		return models.User{}, false
+		return &models.User{}, false
 	}
 
 	var (
@@ -75,5 +75,5 @@ func FindOrCreateUserUsingService(service, code string, txn *gorm.DB) (models.Us
 		txn.Model(&userService).Related(&user)
 	}
 
-	return user, true
+	return &user, true
 }

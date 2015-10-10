@@ -1,13 +1,27 @@
 package controllers
 
 import (
+	"strconv"
+
 	"github.com/revel/revel"
 
 	"github.com/Gr1N/pacman/app/modules/auth"
 )
 
 type Auth struct {
-	*revel.Controller
+	Application
+}
+
+type Authd struct {
+	Application
+}
+
+func (c Auth) checkAuthentication() revel.Result {
+	if user := c.withUser(); user != nil {
+		return c.Redirect(Application.Index)
+	}
+
+	return nil
 }
 
 func (c Auth) Index() revel.Result {
@@ -48,9 +62,29 @@ func (c Auth) LoginEnd(service string) revel.Result {
 	stateValid := auth.StateValid(service, c.Session.Id(), state, c.Validation)
 	codeValid := auth.CodeValid(service, code, c.Validation)
 	if !stateValid || !codeValid {
-		// TODO: show error?
+		// TODO: handle error
 		return c.Redirect(Auth.Index)
 	}
 
-	return c.Redirect(Auth.Index)
+	user, found := auth.FindOrCreateUserUsingService(service, code, c.Txn)
+	if !found {
+		// TODO: handle error
+		return c.Redirect(Auth.Index)
+	}
+
+	flushSession(c.Session)
+	c.Session["user_id"] = strconv.FormatInt(user.Id, 10)
+
+	return c.Redirect(Application.Index)
+}
+
+func (c Authd) Logout() revel.Result {
+	flushSession(c.Session)
+	return c.Redirect(Application.Index)
+}
+
+func flushSession(session revel.Session) {
+	for k := range session {
+		delete(session, k)
+	}
 }
