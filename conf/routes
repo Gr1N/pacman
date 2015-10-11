@@ -7,11 +7,11 @@ module:testrunner
 GET     /                                       Application.Index
 
 # Auth
-GET     /login                                  Auth.Index
-POST    /login/:service                         Auth.Login
-GET     /login/:service/end                     Auth.IndexEnd
-POST    /login/:service/end                     Auth.LoginEnd
-POST    /logout                                 Authd.Logout
+GET     /login                                  AuthSocial.Index
+POST    /login/:service                         AuthSocial.Login
+GET     /login/:service/end                     AuthSocial.IndexEnd
+POST    /login/:service/end                     AuthSocial.LoginEnd
+POST    /logout                                 Auth.Logout
 
 # Ignore favicon requests
 GET     /favicon.ico                            404

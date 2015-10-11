@@ -10,10 +10,6 @@ var (
 	GitHub *Config
 )
 
-func init() {
-	revel.OnAppStart(initGitHub)
-}
-
 func initGitHub() {
 	clientId, _ := revel.Config.String("auth.github.client_id")
 	clientSecret, _ := revel.Config.String("auth.github.client_secret")

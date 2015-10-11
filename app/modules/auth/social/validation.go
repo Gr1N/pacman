@@ -1,4 +1,4 @@
-package auth
+package social
 
 import (
 	"crypto/subtle"

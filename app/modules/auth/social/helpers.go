@@ -1,4 +1,4 @@
-package auth
+package social
 
 import (
 	"strings"
@@ -40,7 +40,7 @@ func makeStateCacheKey(service, sessionId string) string {
 	}, ":")
 }
 
-func FindOrCreateUserUsingService(service, code string, txn *gorm.DB) (*models.User, bool) {
+func FindOrCreateUser(service, code string, txn *gorm.DB) (*models.User, bool) {
 	token := SupportedServices[service].Exchange(code)
 	if token == nil {
 		return &models.User{}, false
