@@ -2,10 +2,6 @@ package app
 
 import (
 	"github.com/revel/revel"
-
-	gorm "github.com/Gr1N/revel-gorm/app"
-
-	"github.com/Gr1N/pacman/app/models"
 )
 
 func init() {
@@ -27,12 +23,7 @@ func init() {
 
 	// Register startup functions with OnAppStart
 	// ( order dependent )
-	revel.OnAppStart(func() {
-		// Initialize GORM...
-		dbm := gorm.InitDB()
-		// ...and migrate
-		dbm.AutoMigrate(&models.User{}, &models.Service{})
-	})
+	revel.OnAppStart(initDB)
 	// revel.OnAppStart(FillCache)
 }
 
