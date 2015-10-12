@@ -43,37 +43,19 @@ func makeStateCacheKey(service, sessionId string) string {
 func FindOrCreateUser(service, code string, txn *gorm.DB) (*models.User, bool) {
 	token := SupportedServices[service].Exchange(code)
 	if token == nil {
-		return &models.User{}, false
+		return nil, false
 	}
 
 	externalUser := SupportedServices[service].User(token)
 	if externalUser == nil {
-		return &models.User{}, false
+		return nil, false
 	}
 
-	var (
-		user        models.User
-		userService models.Service
-	)
-
-	txn.Where(&models.Service{
-		Name:          service,
-		UserServiceId: externalUser.Id,
-	}).First(&userService)
-
-	if userService.Id == 0 {
-		user = models.User{
-			Services: []models.Service{{
-				Name:             service,
-				UserServiceId:    externalUser.Id,
-				UserServiceName:  externalUser.Name,
-				UserServiceEmail: externalUser.Email,
-			}},
-		}
-		txn.Create(&user)
-	} else {
-		txn.Model(&userService).Related(&user)
+	if user, err := models.GetUserByService(txn, service, externalUser.Id); err == nil {
+		return user, true
 	}
 
-	return &user, true
+	user := models.CreateUserByService(txn, service, externalUser.Id, externalUser.Name,
+		externalUser.Email)
+	return user, true
 }

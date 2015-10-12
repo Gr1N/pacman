@@ -29,19 +29,10 @@ func (c Application) withUser() *models.User {
 
 	if userId, ok := c.Session["user_id"]; ok {
 		if id, err := strconv.ParseInt(userId, 10, 64); err == nil {
-			return c.getUser(id)
+			if user, err := models.GetUserById(c.Txn, id); err == nil {
+				return user
+			}
 		}
-	}
-
-	return nil
-}
-
-func (c Application) getUser(userId int64) *models.User {
-	var user models.User
-
-	c.Txn.First(&user, userId)
-	if user.Id != 0 {
-		return &user
 	}
 
 	return nil
