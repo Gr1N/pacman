@@ -7,13 +7,11 @@ import (
 )
 
 type Auth struct {
-	Application
+	Base
 }
 
 func (c Auth) Logout() revel.Result {
-	for k := range c.Session {
-		delete(c.Session, k)
-	}
+	c.flushSession()
 
 	return c.Redirect(routes.Application.Index())
 }

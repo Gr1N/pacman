@@ -8,7 +8,7 @@ import (
 
 func init() {
 	revel.InterceptMethod((*gorm.TransactionalController).Begin, revel.BEFORE)
-	revel.InterceptMethod(Application.tryAuthenticate, revel.BEFORE)
+	revel.InterceptMethod(Base.tryAuthenticate, revel.BEFORE)
 	revel.InterceptMethod(AuthSocial.checkAuthentication, revel.BEFORE)
 
 	revel.InterceptMethod((*gorm.TransactionalController).Commit, revel.AFTER)

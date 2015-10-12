@@ -10,7 +10,7 @@ import (
 )
 
 type AuthSocial struct {
-	Application
+	Base
 }
 
 func (c AuthSocial) checkAuthentication() revel.Result {
@@ -69,9 +69,7 @@ func (c AuthSocial) LoginEnd(service string) revel.Result {
 		return c.Redirect(routes.AuthSocial.Index())
 	}
 
-	for k := range c.Session {
-		delete(c.Session, k)
-	}
+	c.flushSession()
 
 	c.Session["user_id"] = strconv.FormatInt(user.Id, 10)
 
