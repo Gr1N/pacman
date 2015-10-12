@@ -12,15 +12,14 @@ import (
 )
 
 var (
-	SupportedServices map[string]*oauth2.Config
-
+	supportedServices map[string]*oauth2.Config
 	enabledServices   *regexp.Regexp
 	stateCacheTimeout time.Duration
 )
 
 func init() {
 	revel.OnAppStart(func() {
-		SupportedServices = map[string]*oauth2.Config{
+		supportedServices = map[string]*oauth2.Config{
 			"github": oauth2.GitHub,
 		}
 

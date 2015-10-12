@@ -26,7 +26,7 @@ func (c AuthSocial) Index() revel.Result {
 }
 
 func (c AuthSocial) IndexEnd(service string) revel.Result {
-	if !auths.ServiceEnabled(service, c.Validation) {
+	if err := auths.HandleService(service, c.Validation); err != nil {
 		return c.Redirect(routes.AuthSocial.Index())
 	}
 
@@ -34,17 +34,17 @@ func (c AuthSocial) IndexEnd(service string) revel.Result {
 }
 
 func (c AuthSocial) Login(service string) revel.Result {
-	if !auths.ServiceEnabled(service, c.Validation) {
+	if err := auths.HandleService(service, c.Validation); err != nil {
 		return c.Redirect(routes.AuthSocial.Index())
 	}
 
-	state := auths.IssueState(service, c.Session.Id())
-	return c.Redirect(auths.SupportedServices[service].AuthCodeUrl(state))
+	redirectUrl := auths.HandleAuthorizeRequest(service, c.Session.Id())
+	return c.Redirect(redirectUrl)
 }
 
 func (c AuthSocial) LoginEnd(service string) revel.Result {
 	// TODO: handle OAuth2.0 cancel response
-	if !auths.ServiceEnabled(service, c.Validation) {
+	if err := auths.HandleService(service, c.Validation); err != nil {
 		return c.Redirect(routes.AuthSocial.Index())
 	}
 
@@ -56,15 +56,14 @@ func (c AuthSocial) LoginEnd(service string) revel.Result {
 	c.Params.Bind(&state, "state")
 	c.Params.Bind(&code, "code")
 
-	stateValid := auths.StateValid(service, c.Session.Id(), state, c.Validation)
-	codeValid := auths.CodeValid(service, code, c.Validation)
-	if !stateValid || !codeValid {
+	if err := auths.ValidateAuthorizeRequest(service, c.Session.Id(),
+		state, code, c.Validation); err != nil {
 		// TODO: handle error
 		return c.Redirect(routes.AuthSocial.Index())
 	}
 
-	user, found := auths.FindOrCreateUser(service, code, c.Txn)
-	if !found {
+	user, err := auths.FinishAuthorizeRequest(service, code, c.Txn)
+	if err != nil {
 		// TODO: handle error
 		return c.Redirect(routes.AuthSocial.Index())
 	}

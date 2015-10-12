@@ -18,6 +18,7 @@ type User struct {
 
 func CreateUserByService(db *gorm.DB, serviceName string, userServiceId int64,
 	userServiceName, userServiceEmail string) *User {
+
 	user := User{
 		Services: []Service{{
 			Name:             serviceName,

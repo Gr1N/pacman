@@ -1,13 +1,17 @@
 package oauth2
 
 import (
+	"errors"
 	"net/http"
 	"net/url"
 	"strings"
 
 	"github.com/franela/goreq"
+)
 
-	"github.com/revel/revel"
+var (
+	ErrCodeInvalid        = errors.New("Authorization code invalid")
+	ErrAccessTokenInvalid = errors.New("AccessToken invalid")
 )
 
 type Config struct {
@@ -64,7 +68,7 @@ func (c Config) AuthCodeUrl(state string) string {
 	}, "?")
 }
 
-func (c Config) Exchange(code string) *Token {
+func (c Config) Exchange(code string) (*Token, error) {
 	body := map[string]string{
 		"grant_type":   "authorization_code",
 		"code":         code,
@@ -80,33 +84,29 @@ func (c Config) Exchange(code string) *Token {
 		BasicAuthPassword: c.ClientSecret,
 	}.Do()
 	if err != nil {
-		revel.ERROR.Printf("Got error (%v), while fetching token", err)
-		return nil
+		return nil, err
 	}
 
 	defer resp.Body.Close()
 
 	if status := resp.StatusCode; status != http.StatusOK {
-		revel.ERROR.Printf("Got unexpected status (%v) while fetching token",
-			status)
-		return nil
+		return nil, ErrCodeInvalid
 	}
 
 	var tj tokenJSON
 
 	if err := resp.Body.FromJsonTo(&tj); err != nil || tj.Access == "" {
-		revel.ERROR.Printf("AccessToken not found in token response")
-		return nil
+		return nil, ErrCodeInvalid
 	}
 
 	return &Token{
 		Access: tj.Access,
 		Type:   tj.Type,
 		Scopes: strings.Split(tj.Scope, ","),
-	}
+	}, nil
 }
 
-func (c Config) User(token *Token) *User {
+func (c Config) User(token *Token) (*User, error) {
 	authorization := strings.Join([]string{
 		"token",
 		token.Access,
@@ -117,27 +117,24 @@ func (c Config) User(token *Token) *User {
 		Accept: "application/json",
 	}.WithHeader("Authorization", authorization).Do()
 	if err != nil {
-		revel.ERROR.Printf("Got error (%v), while fetching user data", err)
-		return nil
+		return nil, err
 	}
 
 	defer resp.Body.Close()
 
 	if status := resp.StatusCode; status != http.StatusOK {
-		revel.ERROR.Printf("Got unexpected status (%v) while user data", status)
-		return nil
+		return nil, ErrAccessTokenInvalid
 	}
 
 	var uj userJSON
 
 	if err := resp.Body.FromJsonTo(&uj); err != nil || uj.Id == 0 {
-		revel.ERROR.Printf("User Id not found in response")
-		return nil
+		return nil, ErrAccessTokenInvalid
 	}
 
 	return &User{
 		Id:    uj.Id,
 		Name:  uj.Name,
 		Email: uj.Email,
-	}
+	}, nil
 }
