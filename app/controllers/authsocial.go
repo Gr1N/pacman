@@ -62,7 +62,7 @@ func (c AuthSocial) LoginEnd(service string) revel.Result {
 		return c.Redirect(routes.AuthSocial.Index())
 	}
 
-	user, err := auths.FinishAuthorizeRequest(service, code, c.Txn)
+	user, err := auths.FinishAuthorizeRequest(service, code)
 	if err != nil {
 		// TODO: handle error
 		return c.Redirect(routes.AuthSocial.Index())

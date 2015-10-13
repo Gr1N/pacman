@@ -5,8 +5,6 @@ import (
 	"errors"
 	"strings"
 
-	"github.com/jinzhu/gorm"
-
 	"github.com/revel/revel"
 	"github.com/revel/revel/cache"
 
@@ -53,7 +51,7 @@ func ValidateAuthorizeRequest(serviceName, sessionId, state, code string,
 	return nil
 }
 
-func FinishAuthorizeRequest(serviceName, code string, db *gorm.DB) (*models.User, error) {
+func FinishAuthorizeRequest(serviceName, code string) (*models.User, error) {
 	service := supportedServices[serviceName]
 
 	token, err := service.Exchange(code)
@@ -66,11 +64,11 @@ func FinishAuthorizeRequest(serviceName, code string, db *gorm.DB) (*models.User
 		return nil, err
 	}
 
-	if user, err := models.GetUserByService(db, serviceName, serviceUser.Id); err == nil {
+	if user, err := models.GetUserByService(serviceName, serviceUser.Id); err == nil {
 		return user, nil
 	}
 
-	user := models.CreateUserByService(db, serviceName, serviceUser.Id,
+	user := models.CreateUserByService(serviceName, serviceUser.Id,
 		serviceUser.Name, serviceUser.Email)
 	return user, nil
 }

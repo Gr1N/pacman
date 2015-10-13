@@ -3,7 +3,7 @@ package models
 import (
 	"errors"
 
-	"github.com/jinzhu/gorm"
+	g "github.com/Gr1N/revel-gorm/app"
 )
 
 var (
@@ -16,7 +16,7 @@ type User struct {
 	Services []Service
 }
 
-func CreateUserByService(db *gorm.DB, serviceName string, userServiceId int64,
+func CreateUserByService(serviceName string, userServiceId int64,
 	userServiceName, userServiceEmail string) *User {
 
 	user := User{
@@ -27,14 +27,14 @@ func CreateUserByService(db *gorm.DB, serviceName string, userServiceId int64,
 			UserServiceEmail: userServiceEmail,
 		}},
 	}
-	db.Create(&user)
+	g.DB.Create(&user)
 
 	return &user
 }
 
-func GetUserById(db *gorm.DB, id int64) (*User, error) {
+func GetUserById(id int64) (*User, error) {
 	var user User
-	db.First(&user, id)
+	g.DB.First(&user, id)
 
 	if user.Id == 0 {
 		return nil, ErrUserNotExist
@@ -43,9 +43,9 @@ func GetUserById(db *gorm.DB, id int64) (*User, error) {
 	return &user, nil
 }
 
-func GetUserByService(db *gorm.DB, serviceName string, userServiceId int64) (*User, error) {
+func GetUserByService(serviceName string, userServiceId int64) (*User, error) {
 	var service Service
-	db.Where(&Service{
+	g.DB.Where(&Service{
 		Name:          serviceName,
 		UserServiceId: userServiceId,
 	}).First(&service)
@@ -55,7 +55,7 @@ func GetUserByService(db *gorm.DB, serviceName string, userServiceId int64) (*Us
 	}
 
 	var user User
-	db.Model(&service).Related(&user)
+	g.DB.Model(&service).Related(&user)
 
 	return &user, nil
 }

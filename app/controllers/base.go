@@ -5,13 +5,11 @@ import (
 
 	"github.com/revel/revel"
 
-	gorm "github.com/Gr1N/revel-gorm/app/controllers"
-
 	"github.com/Gr1N/pacman/app/models"
 )
 
 type Base struct {
-	gorm.TransactionalController
+	*revel.Controller
 }
 
 func (c Base) tryAuthenticate() revel.Result {
@@ -29,7 +27,7 @@ func (c Base) withUser() *models.User {
 
 	if userId, ok := c.Session["user_id"]; ok {
 		if id, err := strconv.ParseInt(userId, 10, 64); err == nil {
-			if user, err := models.GetUserById(c.Txn, id); err == nil {
+			if user, err := models.GetUserById(id); err == nil {
 				return user
 			}
 		}
