@@ -12,6 +12,11 @@ import (
 	"github.com/Gr1N/pacman/app/modules/helpers"
 )
 
+const (
+	stateLength = 32
+	codeLength  = 20
+)
+
 var (
 	ErrServiceRequired = errors.New("Service invalid or disabled")
 	ErrStateRequired   = errors.New("State does not match requirements")
@@ -74,7 +79,7 @@ func FinishAuthorizeRequest(serviceName, code string) (*models.User, error) {
 }
 
 func issueState(serviceName, sessionId string) string {
-	state := helpers.RandomString(32)
+	state := helpers.RandomString(stateLength)
 
 	key := makeStateCacheKey(serviceName, sessionId)
 	go cache.Set(key, state, stateCacheTimeout)
@@ -84,7 +89,7 @@ func issueState(serviceName, sessionId string) string {
 
 func validateState(serviceName, sessionId, state string, v *revel.Validation) error {
 	v.Required(state)
-	v.Length(state, 32)
+	v.Length(state, stateLength)
 
 	if v.HasErrors() {
 		return ErrStateRequired
@@ -124,7 +129,7 @@ func makeStateCacheKey(serviceName, sessionId string) string {
 
 func validateCode(code string, v *revel.Validation) error {
 	v.Required(code)
-	v.Length(code, 20)
+	v.Length(code, codeLength)
 
 	if v.HasErrors() {
 		return ErrCodeRequired
