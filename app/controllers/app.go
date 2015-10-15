@@ -5,7 +5,7 @@ import (
 )
 
 type Application struct {
-	Base
+	Any
 }
 
 func (c Application) Index() revel.Result {

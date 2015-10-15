@@ -10,15 +10,7 @@ import (
 )
 
 type AuthSocial struct {
-	Base
-}
-
-func (c AuthSocial) checkAuthentication() revel.Result {
-	if user := c.withUser(); user != nil {
-		return c.Redirect(routes.Application.Index())
-	}
-
-	return nil
+	NotAuthenticated
 }
 
 func (c AuthSocial) Index() revel.Result {

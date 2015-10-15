@@ -5,6 +5,13 @@ import (
 )
 
 func init() {
-	revel.InterceptMethod(Base.tryAuthenticate, revel.BEFORE)
-	revel.InterceptMethod(AuthSocial.checkAuthentication, revel.BEFORE)
+	revel.InterceptMethod(Any.attachUser, revel.BEFORE)
+	revel.InterceptMethod(NotAuthenticated.attachUser, revel.BEFORE)
+	revel.InterceptMethod(NotAuthenticated.checkUser, revel.BEFORE)
+	revel.InterceptMethod(AnyAuthenticated.attachUser, revel.BEFORE)
+	revel.InterceptMethod(AnyAuthenticated.checkUser, revel.BEFORE)
+	revel.InterceptMethod(SessionAuthenticated.attachUser, revel.BEFORE)
+	revel.InterceptMethod(SessionAuthenticated.checkUser, revel.BEFORE)
+	revel.InterceptMethod(TokenAuthenticated.attachUser, revel.BEFORE)
+	revel.InterceptMethod(TokenAuthenticated.checkUser, revel.BEFORE)
 }

@@ -7,7 +7,7 @@ import (
 )
 
 type Auth struct {
-	Base
+	SessionAuthenticated
 }
 
 func (c Auth) Logout() revel.Result {

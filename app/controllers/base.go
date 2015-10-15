@@ -6,25 +6,63 @@ import (
 	"github.com/revel/revel"
 
 	"github.com/Gr1N/pacman/app/models"
+	"github.com/Gr1N/pacman/app/routes"
 )
 
 type Base struct {
 	*revel.Controller
 }
 
-func (c Base) tryAuthenticate() revel.Result {
-	if user := c.withUser(); user != nil {
+type Any struct {
+	Base
+}
+
+type NotAuthenticated struct {
+	Base
+}
+
+type AnyAuthenticated struct {
+	Base
+}
+
+type SessionAuthenticated struct {
+	Base
+}
+
+type TokenAuthenticated struct {
+	Base
+}
+
+func (c Base) attachUser() revel.Result {
+	if user := c.getUser(); user != nil {
+		return nil
+	}
+
+	if user := c.getUserFromSessionCookie(); user != nil {
 		c.RenderArgs["user"] = user
+		return nil
 	}
 
 	return nil
 }
 
-func (c Base) withUser() *models.User {
+func (c Base) checkUser() revel.Result {
+	if user := c.getUser(); user == nil {
+		return c.Redirect(routes.AuthSocial.Index())
+	}
+
+	return nil
+}
+
+func (c Base) getUser() *models.User {
 	if c.RenderArgs["user"] != nil {
 		return c.RenderArgs["user"].(*models.User)
 	}
 
+	return nil
+}
+
+func (c Base) getUserFromSessionCookie() *models.User {
 	if userId, ok := c.Session["user_id"]; ok {
 		if id, err := strconv.ParseInt(userId, 10, 64); err == nil {
 			if user, err := models.GetUserById(id); err == nil {
@@ -36,8 +74,75 @@ func (c Base) withUser() *models.User {
 	return nil
 }
 
+func (c Base) getUserFromToken() *models.User {
+	return nil
+}
+
 func (c Base) flushSession() {
 	for k := range c.Session {
 		delete(c.Session, k)
 	}
+}
+
+func (c Any) attachUser() revel.Result {
+	return c.Base.attachUser()
+}
+
+func (c NotAuthenticated) attachUser() revel.Result {
+	return c.Base.attachUser()
+}
+
+func (c NotAuthenticated) checkUser() revel.Result {
+	if user := c.getUser(); user != nil {
+		return c.Redirect(routes.Application.Index())
+	}
+
+	return nil
+}
+
+func (c AnyAuthenticated) attachUser() revel.Result {
+	if user := c.getUser(); user != nil {
+		return nil
+	}
+
+	if user := c.getUserFromSessionCookie(); user != nil {
+		c.RenderArgs["user"] = user
+		return nil
+	}
+
+	if user := c.getUserFromToken(); user != nil {
+		c.RenderArgs["user"] = user
+		return nil
+	}
+
+	return nil
+}
+
+func (c AnyAuthenticated) checkUser() revel.Result {
+	return c.Base.checkUser()
+}
+
+func (c SessionAuthenticated) attachUser() revel.Result {
+	return c.Base.attachUser()
+}
+
+func (c SessionAuthenticated) checkUser() revel.Result {
+	return c.Base.checkUser()
+}
+
+func (c TokenAuthenticated) attachUser() revel.Result {
+	if user := c.getUser(); user != nil {
+		return nil
+	}
+
+	if user := c.getUserFromToken(); user != nil {
+		c.RenderArgs["user"] = user
+		return nil
+	}
+
+	return nil
+}
+
+func (c TokenAuthenticated) checkUser() revel.Result {
+	return c.Base.checkUser()
 }
