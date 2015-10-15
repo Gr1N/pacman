@@ -2,6 +2,8 @@ package helpers
 
 import (
 	"bytes"
+	"crypto/sha1"
+	"encoding/hex"
 	"math/rand"
 	"time"
 )
@@ -29,4 +31,10 @@ func JoinStrings(strings ...string) string {
 	}
 
 	return buf.String()
+}
+
+func EncodeSha1(s string) string {
+	h := sha1.New()
+	h.Write([]byte(s))
+	return hex.EncodeToString(h.Sum(nil))
 }

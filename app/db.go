@@ -11,5 +11,8 @@ func initDB() {
 	dbm := g.InitDB()
 
 	// ...and migrate
-	dbm.AutoMigrate(&models.User{}, &models.Service{})
+	dbm.AutoMigrate(
+		&models.User{},
+		&models.Service{},
+		&models.Token{})
 }

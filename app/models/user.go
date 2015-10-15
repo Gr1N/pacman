@@ -32,6 +32,17 @@ func CreateUserByService(serviceName string, userServiceId int64,
 	return &user
 }
 
+func CreateUserToken(id int64, audience, value string) *Token {
+	token := Token{
+		UserId:   id,
+		Audience: audience,
+		Value:    value,
+	}
+	g.DB.Create(&token)
+
+	return &token
+}
+
 func GetUserById(id int64) (*User, error) {
 	var user User
 	g.DB.First(&user, id)
