@@ -1,5 +1,9 @@
 package models
 
+import (
+	"github.com/Gr1N/pacman/app/routes"
+)
+
 type Token struct {
 	Model
 
@@ -7,4 +11,8 @@ type Token struct {
 
 	Audience string `sql:"not null"`
 	Value    string `sql:"not null;unique_index:idx_userid_value"`
+}
+
+func (t Token) Url() string {
+	return routes.Token.Read(t.Id)
 }

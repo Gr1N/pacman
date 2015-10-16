@@ -7,7 +7,8 @@ import (
 )
 
 var (
-	ErrUserNotExist = errors.New("User does not exist")
+	ErrUserNotExist      = errors.New("User does not exist")
+	ErrUserTokenNotExist = errors.New("User token does not exist")
 )
 
 type User struct {
@@ -73,9 +74,18 @@ func GetUserByService(serviceName string, userServiceId int64) (*User, error) {
 
 func GetUserTokens(id int64) []Token {
 	var tokens []Token
-	g.DB.Where(&Token{
-		UserId: id,
-	}).Find(&tokens)
+	g.DB.Find(&tokens, "user_id = ?", id)
 
 	return tokens
+}
+
+func GetUserToken(id, tokenId int64) (*Token, error) {
+	var token Token
+	g.DB.Find(&token, "id = ? AND user_id = ?", tokenId, id)
+
+	if token.Id == 0 {
+		return nil, ErrUserTokenNotExist
+	}
+
+	return &token, nil
 }

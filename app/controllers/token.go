@@ -37,8 +37,6 @@ func (c Token) Create() revel.Result {
 	user := c.getUser()
 	token := autht.FinishTokenRequest(user.Id, audience)
 
-	location := "TBD"
-
 	return c.RenderJsonCreated(jsonapi.Item{
 		Type: "tokens",
 		Id:   token.Id,
@@ -48,19 +46,18 @@ func (c Token) Create() revel.Result {
 			Created:  token.CreatedAt.Unix(),
 		},
 		Links: jsonapi.ItemLinks{
-			Self: location,
+			Self: token.Url(),
 		},
 	})
 }
 
-func (c Token) Read() revel.Result {
+func (c Token) ReadAll() revel.Result {
 	user := c.getUser()
 	tokens := models.GetUserTokens(user.Id)
 
 	items := make([]jsonapi.Item, len(tokens))
 	for i := range items {
 		token := tokens[i]
-		location := "TBD"
 
 		items[i] = jsonapi.Item{
 			Type: "tokens",
@@ -70,10 +67,30 @@ func (c Token) Read() revel.Result {
 				Created:  token.CreatedAt.Unix(),
 			},
 			Links: jsonapi.ItemLinks{
-				Self: location,
+				Self: token.Url(),
 			},
 		}
 	}
 
 	return c.RenderJsonOk(items)
+}
+
+func (c Token) Read(id int64) revel.Result {
+	user := c.getUser()
+
+	if token, err := models.GetUserToken(user.Id, id); err == nil {
+		return c.RenderJsonOk([]jsonapi.Item{{
+			Type: "tokens",
+			Id:   token.Id,
+			Attributes: tokenItemAttrs{
+				Audience: token.Audience,
+				Created:  token.CreatedAt.Unix(),
+			},
+			Links: jsonapi.ItemLinks{
+				Self: token.Url(),
+			},
+		}})
+	}
+
+	return c.RenderNotFound()
 }

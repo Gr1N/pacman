@@ -32,3 +32,9 @@ func (c Base) RenderJsonBadRequest(errors []jsonapi.Error) revel.Result {
 		"errors": errors,
 	})
 }
+
+func (c Base) RenderNotFound() revel.Result {
+	c.Response.Status = http.StatusNotFound
+
+	return c.RenderText("")
+}
