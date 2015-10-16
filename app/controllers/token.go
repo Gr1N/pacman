@@ -1,15 +1,20 @@
 package controllers
 
 import (
-	"net/http"
-
 	"github.com/revel/revel"
 
 	autht "github.com/Gr1N/pacman/app/modules/auth/token"
+	"github.com/Gr1N/pacman/app/modules/jsonapi"
 )
 
 type Token struct {
 	SessionAuthenticated
+}
+
+type tokenItemAttrs struct {
+	Audience string `json:"audience"`
+	Value    string `json:"value"`
+	Created  int64  `json:"created"`
 }
 
 func (c Token) Create() revel.Result {
@@ -18,18 +23,26 @@ func (c Token) Create() revel.Result {
 	c.Params.Bind(&audience, "audience")
 
 	if err := autht.ValidateTokenRequest(audience, c.Validation); err != nil {
-		c.Response.Status = http.StatusBadRequest
-		return c.RenderJson(map[string]interface{}{
-			"error": err.Error(),
-		})
+		return c.RenderJsonBadRequest([]jsonapi.Error{{
+			Detail: err.Error(),
+		}})
 	}
 
 	user := c.getUser()
 	token := autht.FinishTokenRequest(user.Id, audience)
 
-	return c.RenderJson(map[string]interface{}{
-		"audience":   token.Audience,
-		"token":      token.Value,
-		"created_at": token.CreatedAt.Unix(),
+	location := "TBD"
+
+	return c.RenderJsonCreated(jsonapi.Item{
+		Type: "tokens",
+		Id:   token.Id,
+		Attributes: tokenItemAttrs{
+			Audience: token.Audience,
+			Value:    token.Value,
+			Created:  token.CreatedAt.Unix(),
+		},
+		Links: jsonapi.ItemLinks{
+			Self: location,
+		},
 	})
 }

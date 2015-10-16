@@ -14,7 +14,7 @@ POST    /login/:service/end                     AuthSocial.LoginEnd
 POST    /logout                                 Auth.Logout
 
 # Settings
-POST    /settings/token                         Token.Create
+POST    /settings/tokens                        Token.Create
 
 # Ignore favicon requests
 GET     /favicon.ico                            404
