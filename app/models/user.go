@@ -70,3 +70,12 @@ func GetUserByService(serviceName string, userServiceId int64) (*User, error) {
 
 	return &user, nil
 }
+
+func GetUserTokens(id int64) []Token {
+	var tokens []Token
+	g.DB.Where(&Token{
+		UserId: id,
+	}).Find(&tokens)
+
+	return tokens
+}

@@ -3,6 +3,7 @@ package controllers
 import (
 	"github.com/revel/revel"
 
+	"github.com/Gr1N/pacman/app/models"
 	autht "github.com/Gr1N/pacman/app/modules/auth/token"
 	"github.com/Gr1N/pacman/app/modules/jsonapi"
 )
@@ -11,9 +12,14 @@ type Token struct {
 	SessionAuthenticated
 }
 
-type tokenItemAttrs struct {
+type tokenWithValueItemAttrs struct {
 	Audience string `json:"audience"`
 	Value    string `json:"value"`
+	Created  int64  `json:"created"`
+}
+
+type tokenItemAttrs struct {
+	Audience string `json:"audience"`
 	Created  int64  `json:"created"`
 }
 
@@ -36,7 +42,7 @@ func (c Token) Create() revel.Result {
 	return c.RenderJsonCreated(jsonapi.Item{
 		Type: "tokens",
 		Id:   token.Id,
-		Attributes: tokenItemAttrs{
+		Attributes: tokenWithValueItemAttrs{
 			Audience: token.Audience,
 			Value:    token.Value,
 			Created:  token.CreatedAt.Unix(),
@@ -45,4 +51,29 @@ func (c Token) Create() revel.Result {
 			Self: location,
 		},
 	})
+}
+
+func (c Token) Read() revel.Result {
+	user := c.getUser()
+	tokens := models.GetUserTokens(user.Id)
+
+	items := make([]jsonapi.Item, len(tokens))
+	for i := range items {
+		token := tokens[i]
+		location := "TBD"
+
+		items[i] = jsonapi.Item{
+			Type: "tokens",
+			Id:   token.Id,
+			Attributes: tokenItemAttrs{
+				Audience: token.Audience,
+				Created:  token.CreatedAt.Unix(),
+			},
+			Links: jsonapi.ItemLinks{
+				Self: location,
+			},
+		}
+	}
+
+	return c.RenderJsonOk(items)
 }

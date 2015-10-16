@@ -8,6 +8,14 @@ import (
 	"github.com/Gr1N/pacman/app/modules/jsonapi"
 )
 
+func (c Base) RenderJsonOk(items []jsonapi.Item) revel.Result {
+	c.Response.Status = http.StatusOK
+
+	return c.RenderJson(map[string][]jsonapi.Item{
+		"data": items,
+	})
+}
+
 func (c Base) RenderJsonCreated(item jsonapi.Item) revel.Result {
 	c.Response.Status = http.StatusCreated
 	c.Response.Out.Header().Set("Location", item.Links.Self)
