@@ -40,5 +40,6 @@ func FinishTokenRequest(userId int64, audience string) *models.Token {
 	value := uuid.NewRandom().String()
 	value = helpers.EncodeSha1(value)
 
-	return models.CreateUserToken(userId, audience, value)
+	token, _ := models.CreateUserToken(userId, audience, value)
+	return token
 }

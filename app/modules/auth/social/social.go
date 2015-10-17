@@ -73,7 +73,7 @@ func FinishAuthorizeRequest(serviceName, code string) (*models.User, error) {
 		return user, nil
 	}
 
-	user := models.CreateUserByService(serviceName, serviceUser.Id,
+	user, _ := models.CreateUserByService(serviceName, serviceUser.Id,
 		serviceUser.Name, serviceUser.Email)
 	return user, nil
 }

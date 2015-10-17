@@ -42,7 +42,7 @@ func (c Token) Create() revel.Result {
 
 func (c Token) ReadAll() revel.Result {
 	user := c.getUser()
-	tokens := models.GetUserTokens(user.Id)
+	tokens, _ := models.GetUserTokens(user.Id)
 
 	items := make([]*jsonapi.Item, len(tokens))
 	for i := range items {

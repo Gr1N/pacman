@@ -18,7 +18,7 @@ type User struct {
 }
 
 func CreateUserByService(serviceName string, userServiceId int64,
-	userServiceName, userServiceEmail string) *User {
+	userServiceName, userServiceEmail string) (*User, error) {
 
 	user := User{
 		Services: []Service{{
@@ -28,27 +28,29 @@ func CreateUserByService(serviceName string, userServiceId int64,
 			UserServiceEmail: userServiceEmail,
 		}},
 	}
-	g.DB.Create(&user)
+	if err := g.DB.Create(&user).Error; err != nil {
+		return nil, err
+	}
 
-	return &user
+	return &user, nil
 }
 
-func CreateUserToken(id int64, audience, value string) *Token {
+func CreateUserToken(id int64, audience, value string) (*Token, error) {
 	token := Token{
 		UserId:   id,
 		Audience: audience,
 		Value:    value,
 	}
-	g.DB.Create(&token)
+	if err := g.DB.Create(&token).Error; err != nil {
+		return nil, err
+	}
 
-	return &token
+	return &token, nil
 }
 
 func GetUserById(id int64) (*User, error) {
 	var user User
-	g.DB.First(&user, id)
-
-	if user.Id == 0 {
+	if g.DB.First(&user, id).RecordNotFound() {
 		return nil, ErrUserNotExist
 	}
 
@@ -57,39 +59,40 @@ func GetUserById(id int64) (*User, error) {
 
 func GetUserByService(serviceName string, userServiceId int64) (*User, error) {
 	var service Service
-	g.DB.Where(&Service{
+	if g.DB.Where(&Service{
 		Name:          serviceName,
 		UserServiceId: userServiceId,
-	}).First(&service)
-
-	if service.Id == 0 {
+	}).First(&service).RecordNotFound() {
 		return nil, ErrUserNotExist
 	}
 
 	var user User
-	g.DB.Model(&service).Related(&user)
+	if g.DB.Model(&service).Related(&user).RecordNotFound() {
+		return nil, ErrUserTokenNotExist
+	}
 
 	return &user, nil
 }
 
-func GetUserTokens(id int64) []*Token {
+func GetUserTokens(id int64) ([]*Token, error) {
 	var tokens []*Token
-	g.DB.Find(&tokens, "user_id = ?", id)
+	if err := g.DB.Find(&tokens, "user_id = ?", id).Error; err != nil {
+		return nil, err
+	}
 
-	return tokens
+	return tokens, nil
 }
 
 func GetUserToken(id, tokenId int64) (*Token, error) {
 	var token Token
-	g.DB.First(&token, "id = ? AND user_id = ?", tokenId, id)
-
-	if token.Id == 0 {
+	if g.DB.First(&token, "id = ? AND user_id = ?", tokenId, id).RecordNotFound() {
 		return nil, ErrUserTokenNotExist
 	}
 
 	return &token, nil
 }
 
-func DeleteUserToken(id, tokenId int64) {
-	g.DB.Where("id = ? AND user_id = ?", tokenId, id).Delete(Token{})
+func DeleteUserToken(id, tokenId int64) error {
+	return g.DB.Where("id = ? AND user_id = ?", tokenId, id).
+		Delete(Token{}).Error
 }
