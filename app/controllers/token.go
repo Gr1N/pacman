@@ -29,7 +29,7 @@ func (c Token) Create() revel.Result {
 	c.Params.Bind(&audience, "audience")
 
 	if err := autht.ValidateTokenRequest(audience, c.Validation); err != nil {
-		return c.RenderJsonBadRequest([]jsonapi.Error{{
+		return c.RenderJsonBadRequest([]*jsonapi.Error{{
 			Detail: err.Error(),
 		}})
 	}
@@ -37,39 +37,16 @@ func (c Token) Create() revel.Result {
 	user := c.getUser()
 	token := autht.FinishTokenRequest(user.Id, audience)
 
-	return c.RenderJsonCreated(jsonapi.Item{
-		Type: "tokens",
-		Id:   token.Id,
-		Attributes: tokenWithValueItemAttrs{
-			Audience: token.Audience,
-			Value:    token.Value,
-			Created:  token.CreatedAt.Unix(),
-		},
-		Links: jsonapi.ItemLinks{
-			Self: token.Url(),
-		},
-	})
+	return c.RenderJsonCreated(c.item(token, true))
 }
 
 func (c Token) ReadAll() revel.Result {
 	user := c.getUser()
 	tokens := models.GetUserTokens(user.Id)
 
-	items := make([]jsonapi.Item, len(tokens))
+	items := make([]*jsonapi.Item, len(tokens))
 	for i := range items {
-		token := tokens[i]
-
-		items[i] = jsonapi.Item{
-			Type: "tokens",
-			Id:   token.Id,
-			Attributes: tokenItemAttrs{
-				Audience: token.Audience,
-				Created:  token.CreatedAt.Unix(),
-			},
-			Links: jsonapi.ItemLinks{
-				Self: token.Url(),
-			},
-		}
+		items[i] = c.item(tokens[i], false)
 	}
 
 	return c.RenderJsonOk(items)
@@ -79,18 +56,42 @@ func (c Token) Read(id int64) revel.Result {
 	user := c.getUser()
 
 	if token, err := models.GetUserToken(user.Id, id); err == nil {
-		return c.RenderJsonOk([]jsonapi.Item{{
-			Type: "tokens",
-			Id:   token.Id,
-			Attributes: tokenItemAttrs{
-				Audience: token.Audience,
-				Created:  token.CreatedAt.Unix(),
-			},
-			Links: jsonapi.ItemLinks{
-				Self: token.Url(),
-			},
-		}})
+		item := c.item(token, false)
+		return c.RenderJsonOk([]*jsonapi.Item{item})
 	}
 
 	return c.RenderNotFound()
+}
+
+func (c Token) Delete(id int64) revel.Result {
+	user := c.getUser()
+	models.DeleteUserToken(user.Id, id)
+
+	return c.RenderNoContent()
+}
+
+func (c Token) item(token *models.Token, withValue bool) *jsonapi.Item {
+	var attributes interface{}
+
+	if withValue {
+		attributes = tokenWithValueItemAttrs{
+			Audience: token.Audience,
+			Value:    token.Value,
+			Created:  token.CreatedAt.Unix(),
+		}
+	} else {
+		attributes = tokenItemAttrs{
+			Audience: token.Audience,
+			Created:  token.CreatedAt.Unix(),
+		}
+	}
+
+	return &jsonapi.Item{
+		Type:       "tokens",
+		Id:         token.Id,
+		Attributes: attributes,
+		Links: jsonapi.ItemLinks{
+			Self: token.Url(),
+		},
+	}
 }

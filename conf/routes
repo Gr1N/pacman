@@ -17,6 +17,7 @@ POST    /logout                                 Auth.Logout
 POST    /settings/tokens                        Token.Create
 GET     /settings/tokens                        Token.ReadAll
 GET     /settings/tokens/:id                    Token.Read
+DELETE  /settings/tokens/:id                    Token.Delete
 
 # Ignore favicon requests
 GET     /favicon.ico                            404

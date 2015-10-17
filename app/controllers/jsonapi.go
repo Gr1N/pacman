@@ -8,29 +8,35 @@ import (
 	"github.com/Gr1N/pacman/app/modules/jsonapi"
 )
 
-func (c Base) RenderJsonOk(items []jsonapi.Item) revel.Result {
+func (c Base) RenderJsonOk(items []*jsonapi.Item) revel.Result {
 	c.Response.Status = http.StatusOK
 
-	return c.RenderJson(map[string][]jsonapi.Item{
+	return c.RenderJson(map[string][]*jsonapi.Item{
 		"data": items,
 	})
 }
 
-func (c Base) RenderJsonCreated(item jsonapi.Item) revel.Result {
+func (c Base) RenderJsonCreated(item *jsonapi.Item) revel.Result {
 	c.Response.Status = http.StatusCreated
 	c.Response.Out.Header().Set("Location", item.Links.Self)
 
-	return c.RenderJson(map[string]jsonapi.Item{
+	return c.RenderJson(map[string]*jsonapi.Item{
 		"data": item,
 	})
 }
 
-func (c Base) RenderJsonBadRequest(errors []jsonapi.Error) revel.Result {
+func (c Base) RenderJsonBadRequest(errors []*jsonapi.Error) revel.Result {
 	c.Response.Status = http.StatusBadRequest
 
-	return c.RenderJson(map[string][]jsonapi.Error{
+	return c.RenderJson(map[string][]*jsonapi.Error{
 		"errors": errors,
 	})
+}
+
+func (c Base) RenderNoContent() revel.Result {
+	c.Response.Status = http.StatusNoContent
+
+	return c.RenderText("")
 }
 
 func (c Base) RenderNotFound() revel.Result {

@@ -72,8 +72,8 @@ func GetUserByService(serviceName string, userServiceId int64) (*User, error) {
 	return &user, nil
 }
 
-func GetUserTokens(id int64) []Token {
-	var tokens []Token
+func GetUserTokens(id int64) []*Token {
+	var tokens []*Token
 	g.DB.Find(&tokens, "user_id = ?", id)
 
 	return tokens
@@ -81,11 +81,15 @@ func GetUserTokens(id int64) []Token {
 
 func GetUserToken(id, tokenId int64) (*Token, error) {
 	var token Token
-	g.DB.Find(&token, "id = ? AND user_id = ?", tokenId, id)
+	g.DB.First(&token, "id = ? AND user_id = ?", tokenId, id)
 
 	if token.Id == 0 {
 		return nil, ErrUserTokenNotExist
 	}
 
 	return &token, nil
+}
+
+func DeleteUserToken(id, tokenId int64) {
+	g.DB.Where("id = ? AND user_id = ?", tokenId, id).Delete(Token{})
 }
