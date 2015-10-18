@@ -11,8 +11,8 @@ import (
 func (c Base) RenderJsonOk(items []*jsonapi.Item) revel.Result {
 	c.Response.Status = http.StatusOK
 
-	return c.RenderJson(map[string][]*jsonapi.Item{
-		"data": items,
+	return c.RenderJson(jsonapi.ResultCollection{
+		Data: items,
 	})
 }
 
@@ -20,16 +20,16 @@ func (c Base) RenderJsonCreated(item *jsonapi.Item) revel.Result {
 	c.Response.Status = http.StatusCreated
 	c.Response.Out.Header().Set("Location", item.Links.Self)
 
-	return c.RenderJson(map[string]*jsonapi.Item{
-		"data": item,
+	return c.RenderJson(jsonapi.ResultIndividual{
+		Data: item,
 	})
 }
 
 func (c Base) RenderJsonBadRequest(errors []*jsonapi.Error) revel.Result {
 	c.Response.Status = http.StatusBadRequest
 
-	return c.RenderJson(map[string][]*jsonapi.Error{
-		"errors": errors,
+	return c.RenderJson(jsonapi.ResultError{
+		Errors: errors,
 	})
 }
 
