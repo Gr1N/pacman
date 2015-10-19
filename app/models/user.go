@@ -17,6 +17,15 @@ type User struct {
 	Services []Service
 }
 
+func CreateUser() (*User, error) {
+	user := User{}
+	if err := g.DB.Create(&user).Error; err != nil {
+		return nil, err
+	}
+
+	return &user, nil
+}
+
 func CreateUserByService(serviceName string, userServiceId int64,
 	userServiceName, userServiceEmail string) (*User, error) {
 
@@ -90,6 +99,13 @@ func GetUserToken(id, tokenId int64) (*Token, error) {
 	}
 
 	return &token, nil
+}
+
+// ATTENTION: Use it only in tests
+func DeleteUser(id int64) {
+	g.DB.Where("user_id = ?", id).Delete(Token{})
+	g.DB.Where("user_id = ?", id).Delete(Service{})
+	g.DB.Where("id = ?", id).Delete(User{})
 }
 
 func DeleteUserToken(id, tokenId int64) error {
