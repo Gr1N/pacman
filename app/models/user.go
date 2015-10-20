@@ -26,12 +26,13 @@ func CreateUser() (*User, error) {
 	return &user, nil
 }
 
-func CreateUserByService(serviceName string, userServiceID int64,
+func CreateUserByService(serviceName, serviceAccessToken string, userServiceID int64,
 	userServiceName, userServiceEmail string) (*User, error) {
 
 	user := User{
 		Services: []Service{{
 			Name:             serviceName,
+			AccessToken:      serviceAccessToken,
 			UserServiceID:    userServiceID,
 			UserServiceName:  userServiceName,
 			UserServiceEmail: userServiceEmail,
@@ -77,7 +78,7 @@ func GetUserByService(serviceName string, userServiceID int64) (*User, error) {
 
 	var user User
 	if g.DB.Model(&service).Related(&user).RecordNotFound() {
-		return nil, ErrUserTokenNotExist
+		return nil, ErrUserNotExist
 	}
 
 	return &user, nil
