@@ -26,13 +26,13 @@ func CreateUser() (*User, error) {
 	return &user, nil
 }
 
-func CreateUserByService(serviceName string, userServiceId int64,
+func CreateUserByService(serviceName string, userServiceID int64,
 	userServiceName, userServiceEmail string) (*User, error) {
 
 	user := User{
 		Services: []Service{{
 			Name:             serviceName,
-			UserServiceId:    userServiceId,
+			UserServiceID:    userServiceID,
 			UserServiceName:  userServiceName,
 			UserServiceEmail: userServiceEmail,
 		}},
@@ -46,7 +46,7 @@ func CreateUserByService(serviceName string, userServiceId int64,
 
 func CreateUserToken(id int64, audience, value string) (*Token, error) {
 	token := Token{
-		UserId:   id,
+		UserID:   id,
 		Audience: audience,
 		Value:    value,
 	}
@@ -57,7 +57,7 @@ func CreateUserToken(id int64, audience, value string) (*Token, error) {
 	return &token, nil
 }
 
-func GetUserById(id int64) (*User, error) {
+func GetUserByID(id int64) (*User, error) {
 	var user User
 	if g.DB.First(&user, id).RecordNotFound() {
 		return nil, ErrUserNotExist
@@ -66,11 +66,11 @@ func GetUserById(id int64) (*User, error) {
 	return &user, nil
 }
 
-func GetUserByService(serviceName string, userServiceId int64) (*User, error) {
+func GetUserByService(serviceName string, userServiceID int64) (*User, error) {
 	var service Service
 	if g.DB.Where(&Service{
 		Name:          serviceName,
-		UserServiceId: userServiceId,
+		UserServiceID: userServiceID,
 	}).First(&service).RecordNotFound() {
 		return nil, ErrUserNotExist
 	}
@@ -92,9 +92,9 @@ func GetUserTokens(id int64) ([]*Token, error) {
 	return tokens, nil
 }
 
-func GetUserToken(id, tokenId int64) (*Token, error) {
+func GetUserToken(id, tokenID int64) (*Token, error) {
 	var token Token
-	if g.DB.First(&token, "id = ? AND user_id = ?", tokenId, id).RecordNotFound() {
+	if g.DB.First(&token, "id = ? AND user_id = ?", tokenID, id).RecordNotFound() {
 		return nil, ErrUserTokenNotExist
 	}
 
@@ -108,7 +108,7 @@ func DeleteUser(id int64) {
 	g.DB.Where("id = ?", id).Delete(User{})
 }
 
-func DeleteUserToken(id, tokenId int64) error {
-	return g.DB.Where("id = ? AND user_id = ?", tokenId, id).
+func DeleteUserToken(id, tokenID int64) error {
+	return g.DB.Where("id = ? AND user_id = ?", tokenID, id).
 		Delete(Token{}).Error
 }

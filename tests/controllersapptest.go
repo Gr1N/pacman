@@ -13,5 +13,5 @@ type ControllersAppTestSuite struct {
 func (t *ControllersAppTestSuite) TestIndex() {
 	t.Get(routes.Application.Index())
 	t.AssertOk()
-	t.AssertContentType(contentTypeTextHtml)
+	t.AssertContentType(contentTypeTextHTML)
 }

@@ -15,18 +15,18 @@ var (
 )
 
 type Config struct {
-	ClientId     string
+	ClientID     string
 	ClientSecret string
-	RedirectUrl  string
+	RedirectURL  string
 	Scopes       []string
 
 	Endpoint Endpoint
 }
 
 type Endpoint struct {
-	AuthUrl  string
-	TokenUrl string
-	UserUrl  string
+	AuthURL  string
+	TokenURL string
+	UserURL  string
 }
 
 type Token struct {
@@ -36,7 +36,7 @@ type Token struct {
 }
 
 type User struct {
-	Id    int64
+	ID    int64
 	Name  string
 	Email string
 }
@@ -48,22 +48,22 @@ type tokenJSON struct {
 }
 
 type userJSON struct {
-	Id    int64  `json:"id"`
+	ID    int64  `json:"id"`
 	Name  string `json:"login"`
 	Email string `json:"email"`
 }
 
-func (c Config) AuthCodeUrl(state string) string {
+func (c Config) AuthCodeURL(state string) string {
 	v := url.Values{
 		"response_type": {"code"},
-		"client_id":     {c.ClientId},
-		"redirect_uri":  {c.RedirectUrl},
+		"client_id":     {c.ClientID},
+		"redirect_uri":  {c.RedirectURL},
 		"scope":         {strings.Join(c.Scopes, " ")},
 		"state":         {state},
 	}
 
 	return strings.Join([]string{
-		c.Endpoint.AuthUrl,
+		c.Endpoint.AuthURL,
 		v.Encode(),
 	}, "?")
 }
@@ -72,15 +72,15 @@ func (c Config) Exchange(code string) (*Token, error) {
 	body := map[string]string{
 		"grant_type":   "authorization_code",
 		"code":         code,
-		"redirect_uri": c.RedirectUrl,
+		"redirect_uri": c.RedirectURL,
 	}
 	resp, err := goreq.Request{
 		Method:            "POST",
-		Uri:               c.Endpoint.TokenUrl,
+		Uri:               c.Endpoint.TokenURL,
 		Body:              body,
 		ContentType:       "application/json",
 		Accept:            "application/json",
-		BasicAuthUsername: c.ClientId,
+		BasicAuthUsername: c.ClientID,
 		BasicAuthPassword: c.ClientSecret,
 	}.Do()
 	if err != nil {
@@ -113,7 +113,7 @@ func (c Config) User(token *Token) (*User, error) {
 	}, " ")
 	resp, err := goreq.Request{
 		Method: "GET",
-		Uri:    c.Endpoint.UserUrl,
+		Uri:    c.Endpoint.UserURL,
 		Accept: "application/json",
 	}.WithHeader("Authorization", authorization).Do()
 	if err != nil {
@@ -128,12 +128,12 @@ func (c Config) User(token *Token) (*User, error) {
 
 	var uj userJSON
 
-	if err := resp.Body.FromJsonTo(&uj); err != nil || uj.Id == 0 {
+	if err := resp.Body.FromJsonTo(&uj); err != nil || uj.ID == 0 {
 		return nil, ErrAccessTokenInvalid
 	}
 
 	return &User{
-		Id:    uj.Id,
+		ID:    uj.ID,
 		Name:  uj.Name,
 		Email: uj.Email,
 	}, nil

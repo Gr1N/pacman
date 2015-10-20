@@ -11,8 +11,8 @@ import (
 )
 
 const (
-	contentTypeTextHtml        = "text/html; charset=utf-8"
-	contentTypeApplicationJson = "application/json; charset=utf-8"
+	contentTypeTextHTML        = "text/html; charset=utf-8"
+	contentTypeApplicationJSON = "application/json; charset=utf-8"
 )
 
 type TestSuiteWithUser interface {
@@ -25,14 +25,14 @@ func attachUser(t TestSuiteWithUser) {
 	if t.getUser() == nil {
 		user, _ := models.CreateUser()
 
-		t.getSession()["user_id"] = strconv.FormatInt(user.Id, 10)
+		t.getSession()["user_id"] = strconv.FormatInt(user.ID, 10)
 		t.setUser(user)
 	}
 }
 
 func detachUser(t TestSuiteWithUser) {
 	if t.getUser() != nil {
-		models.DeleteUser(t.getUser().Id)
+		models.DeleteUser(t.getUser().ID)
 
 		delete(t.getSession(), "user_id")
 		t.setUser(nil)

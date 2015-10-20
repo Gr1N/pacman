@@ -29,35 +29,35 @@ func (c Token) Create() revel.Result {
 	c.Params.Bind(&audience, "audience")
 
 	if err := autht.ValidateTokenRequest(audience, c.Validation); err != nil {
-		return c.RenderJsonBadRequest([]*jsonapi.Error{{
+		return c.RenderJSONBadRequest([]*jsonapi.Error{{
 			Detail: err.Error(),
 		}})
 	}
 
 	user := c.getUser()
-	token := autht.FinishTokenRequest(user.Id, audience)
+	token := autht.FinishTokenRequest(user.ID, audience)
 
-	return c.RenderJsonCreated(c.item(token, true))
+	return c.RenderJSONCreated(c.item(token, true))
 }
 
 func (c Token) ReadAll() revel.Result {
 	user := c.getUser()
-	tokens, _ := models.GetUserTokens(user.Id)
+	tokens, _ := models.GetUserTokens(user.ID)
 
 	items := make([]*jsonapi.Item, len(tokens))
 	for i := range items {
 		items[i] = c.item(tokens[i], false)
 	}
 
-	return c.RenderJsonOk(items)
+	return c.RenderJSONOk(items)
 }
 
 func (c Token) Read(id int64) revel.Result {
 	user := c.getUser()
 
-	if token, err := models.GetUserToken(user.Id, id); err == nil {
+	if token, err := models.GetUserToken(user.ID, id); err == nil {
 		item := c.item(token, false)
-		return c.RenderJsonOk([]*jsonapi.Item{item})
+		return c.RenderJSONOk([]*jsonapi.Item{item})
 	}
 
 	return c.RenderNotFound()
@@ -65,7 +65,7 @@ func (c Token) Read(id int64) revel.Result {
 
 func (c Token) Delete(id int64) revel.Result {
 	user := c.getUser()
-	models.DeleteUserToken(user.Id, id)
+	models.DeleteUserToken(user.ID, id)
 
 	return c.RenderNoContent()
 }
@@ -88,10 +88,10 @@ func (c Token) item(token *models.Token, withValue bool) *jsonapi.Item {
 
 	return &jsonapi.Item{
 		Type:       "tokens",
-		Id:         token.Id,
+		ID:         token.ID,
 		Attributes: attributes,
 		Links: jsonapi.ItemLinks{
-			Self: token.Url(),
+			Self: token.URL(),
 		},
 	}
 }

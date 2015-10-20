@@ -39,7 +39,7 @@ func (t *ControllersTokenTestSuite) setUser(user *models.User) {
 func (t *ControllersTokenTestSuite) TestCreateUnauthorized() {
 	t.PostForm(routes.Token.Create(), url.Values{})
 	t.AssertStatus(http.StatusOK)
-	t.AssertContentType(contentTypeTextHtml)
+	t.AssertContentType(contentTypeTextHTML)
 }
 
 func (t *ControllersTokenTestSuite) TestCreateBadRequest() {
@@ -47,7 +47,7 @@ func (t *ControllersTokenTestSuite) TestCreateBadRequest() {
 
 	t.PostForm(routes.Token.Create(), url.Values{})
 	t.AssertStatus(http.StatusBadRequest)
-	t.AssertContentType(contentTypeApplicationJson)
+	t.AssertContentType(contentTypeApplicationJSON)
 
 	// r := getResultError(t.ResponseBody)
 	// revel.INFO.Println(r.Errors[0].Detail)

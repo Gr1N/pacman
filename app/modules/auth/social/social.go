@@ -35,17 +35,17 @@ func HandleService(serviceName string, v *revel.Validation) error {
 	return nil
 }
 
-func HandleAuthorizeRequest(serviceName, sessionId string) string {
-	state := issueState(serviceName, sessionId)
+func HandleAuthorizeRequest(serviceName, sessionID string) string {
+	state := issueState(serviceName, sessionID)
 	service := supportedServices[serviceName]
 
-	return service.AuthCodeUrl(state)
+	return service.AuthCodeURL(state)
 }
 
-func ValidateAuthorizeRequest(serviceName, sessionId, state, code string,
+func ValidateAuthorizeRequest(serviceName, sessionID, state, code string,
 	v *revel.Validation) error {
 
-	if err := validateState(serviceName, sessionId, state, v); err != nil {
+	if err := validateState(serviceName, sessionID, state, v); err != nil {
 		return err
 	}
 
@@ -69,25 +69,25 @@ func FinishAuthorizeRequest(serviceName, code string) (*models.User, error) {
 		return nil, err
 	}
 
-	if user, err := models.GetUserByService(serviceName, serviceUser.Id); err == nil {
+	if user, err := models.GetUserByService(serviceName, serviceUser.ID); err == nil {
 		return user, nil
 	}
 
-	user, _ := models.CreateUserByService(serviceName, serviceUser.Id,
+	user, _ := models.CreateUserByService(serviceName, serviceUser.ID,
 		serviceUser.Name, serviceUser.Email)
 	return user, nil
 }
 
-func issueState(serviceName, sessionId string) string {
+func issueState(serviceName, sessionID string) string {
 	state := helpers.RandomString(stateLength)
 
-	key := makeStateCacheKey(serviceName, sessionId)
+	key := makeStateCacheKey(serviceName, sessionID)
 	go cache.Set(key, state, stateCacheTimeout)
 
 	return state
 }
 
-func validateState(serviceName, sessionId, state string, v *revel.Validation) error {
+func validateState(serviceName, sessionID, state string, v *revel.Validation) error {
 	v.Required(state)
 	v.Length(state, stateLength)
 
@@ -95,7 +95,7 @@ func validateState(serviceName, sessionId, state string, v *revel.Validation) er
 		return ErrStateRequired
 	}
 
-	cachedState, err := retriveState(serviceName, sessionId)
+	cachedState, err := retriveState(serviceName, sessionID)
 	if err != nil {
 		return ErrStateNotFound
 	}
@@ -107,10 +107,10 @@ func validateState(serviceName, sessionId, state string, v *revel.Validation) er
 	return nil
 }
 
-func retriveState(serviceName, sessionId string) (string, error) {
+func retriveState(serviceName, sessionID string) (string, error) {
 	var state string
 
-	key := makeStateCacheKey(serviceName, sessionId)
+	key := makeStateCacheKey(serviceName, sessionID)
 	if err := cache.Get(key, &state); err != nil {
 		return "", err
 	}
@@ -120,9 +120,9 @@ func retriveState(serviceName, sessionId string) (string, error) {
 	return state, nil
 }
 
-func makeStateCacheKey(serviceName, sessionId string) string {
+func makeStateCacheKey(serviceName, sessionID string) string {
 	return strings.Join([]string{
-		sessionId,
+		sessionID,
 		serviceName,
 	}, ":")
 }

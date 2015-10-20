@@ -63,9 +63,9 @@ func (c Base) getUser() *models.User {
 }
 
 func (c Base) getUserFromSessionCookie() *models.User {
-	if userId, ok := c.Session["user_id"]; ok {
-		if id, err := strconv.ParseInt(userId, 10, 64); err == nil {
-			if user, err := models.GetUserById(id); err == nil {
+	if userID, ok := c.Session["user_id"]; ok {
+		if id, err := strconv.ParseInt(userID, 10, 64); err == nil {
+			if user, err := models.GetUserByID(id); err == nil {
 				return user
 			}
 		}

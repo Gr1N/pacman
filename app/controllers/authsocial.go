@@ -30,8 +30,8 @@ func (c AuthSocial) Login(service string) revel.Result {
 		return c.Redirect(routes.AuthSocial.Index())
 	}
 
-	redirectUrl := auths.HandleAuthorizeRequest(service, c.Session.Id())
-	return c.Redirect(redirectUrl)
+	redirectURL := auths.HandleAuthorizeRequest(service, c.Session.Id())
+	return c.Redirect(redirectURL)
 }
 
 func (c AuthSocial) LoginEnd(service string) revel.Result {
@@ -62,7 +62,7 @@ func (c AuthSocial) LoginEnd(service string) revel.Result {
 
 	c.flushSession()
 
-	c.Session["user_id"] = strconv.FormatInt(user.Id, 10)
+	c.Session["user_id"] = strconv.FormatInt(user.ID, 10)
 
 	return c.Redirect(routes.Application.Index())
 }

@@ -36,10 +36,10 @@ func ValidateTokenRequest(audience string, v *revel.Validation) error {
 	return nil
 }
 
-func FinishTokenRequest(userId int64, audience string) *models.Token {
+func FinishTokenRequest(userID int64, audience string) *models.Token {
 	value := uuid.NewRandom().String()
 	value = helpers.EncodeSha1(value)
 
-	token, _ := models.CreateUserToken(userId, audience, value)
+	token, _ := models.CreateUserToken(userID, audience, value)
 	return token
 }

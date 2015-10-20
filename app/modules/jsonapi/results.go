@@ -10,7 +10,7 @@ type ResultCollection struct {
 
 type Item struct {
 	Type       string      `json:"type"`
-	Id         int64       `json:"id"`
+	ID         int64       `json:"id"`
 	Attributes interface{} `json:"attributes"`
 	Links      ItemLinks   `json:"links"`
 }

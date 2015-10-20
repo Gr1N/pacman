@@ -11,21 +11,21 @@ var (
 )
 
 func initGitHub() {
-	clientId, _ := revel.Config.String("auth.github.client_id")
+	clientID, _ := revel.Config.String("auth.github.client_id")
 	clientSecret, _ := revel.Config.String("auth.github.client_secret")
-	redirectUrl, _ := revel.Config.String("auth.github.redirect_url")
+	redirectURL, _ := revel.Config.String("auth.github.redirect_url")
 	scopes, _ := revel.Config.String("auth.github.scopes")
 
 	GitHub = &Config{
-		ClientId:     clientId,
+		ClientID:     clientID,
 		ClientSecret: clientSecret,
-		RedirectUrl:  redirectUrl,
+		RedirectURL:  redirectURL,
 		Scopes:       strings.Split(scopes, ","),
 
 		Endpoint: Endpoint{
-			AuthUrl:  "https://github.com/login/oauth/authorize",
-			TokenUrl: "https://github.com/login/oauth/access_token",
-			UserUrl:  "https://api.github.com/user",
+			AuthURL:  "https://github.com/login/oauth/authorize",
+			TokenURL: "https://github.com/login/oauth/access_token",
+			UserURL:  "https://api.github.com/user",
 		},
 	}
 }
