@@ -15,8 +15,8 @@ POST    /logout                                 Auth.Logout
 
 # Settings
 POST    /settings/tokens                        Token.Create
-GET     /settings/tokens                        Token.ReadAll
-GET     /settings/tokens/:id                    Token.Read
+GET     /settings/tokens                        Token.GetAll
+GET     /settings/tokens/:id                    Token.Get
 DELETE  /settings/tokens/:id                    Token.Delete
 
 # Ignore favicon requests

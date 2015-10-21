@@ -14,5 +14,5 @@ type Token struct {
 }
 
 func (t Token) URL() string {
-	return routes.Token.Read(t.ID)
+	return routes.Token.Get(t.ID)
 }

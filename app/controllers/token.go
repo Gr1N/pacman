@@ -40,7 +40,7 @@ func (c Token) Create() revel.Result {
 	return c.RenderJSONCreated(c.item(token, true))
 }
 
-func (c Token) ReadAll() revel.Result {
+func (c Token) GetAll() revel.Result {
 	user := c.getUser()
 	tokens, _ := models.GetUserTokens(user.ID)
 
@@ -52,7 +52,7 @@ func (c Token) ReadAll() revel.Result {
 	return c.RenderJSONOk(items)
 }
 
-func (c Token) Read(id int64) revel.Result {
+func (c Token) Get(id int64) revel.Result {
 	user := c.getUser()
 
 	if token, err := models.GetUserToken(user.ID, id); err == nil {

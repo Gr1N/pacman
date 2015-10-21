@@ -8,6 +8,7 @@ import (
 
 var (
 	ErrUserNotExist      = errors.New("User does not exist")
+	ErrServiceNotExist   = errors.New("User service does not exist")
 	ErrUserTokenNotExist = errors.New("User token does not exist")
 )
 
@@ -73,11 +74,27 @@ func GetUserByService(serviceName string, userServiceID int64) (*User, error) {
 		Name:          serviceName,
 		UserServiceID: userServiceID,
 	}).First(&service).RecordNotFound() {
-		return nil, ErrUserNotExist
+		return nil, ErrServiceNotExist
 	}
 
 	var user User
 	if g.DB.Model(&service).Related(&user).RecordNotFound() {
+		return nil, ErrUserNotExist
+	}
+
+	return &user, nil
+}
+
+func GetUserByToken(value string) (*User, error) {
+	var token Token
+	if g.DB.Where(&Token{
+		Value: value,
+	}).First(&token).RecordNotFound() {
+		return nil, ErrUserTokenNotExist
+	}
+
+	var user User
+	if g.DB.Model(&token).Related(&user).RecordNotFound() {
 		return nil, ErrUserNotExist
 	}
 

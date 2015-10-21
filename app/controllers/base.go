@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"strconv"
+	"strings"
 
 	"github.com/revel/revel"
 
@@ -75,6 +76,16 @@ func (c Base) getUserFromSessionCookie() *models.User {
 }
 
 func (c Base) getUserFromToken() *models.User {
+	auth := strings.Split(c.Request.Header.Get("Authorization"), " ")
+	if len(auth) != 2 || strings.ToLower(auth[0]) != "token" {
+		return nil
+	}
+
+	token := auth[1]
+	if user, err := models.GetUserByToken(token); err == nil {
+		return user
+	}
+
 	return nil
 }
 

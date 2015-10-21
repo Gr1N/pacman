@@ -20,10 +20,6 @@ var (
 	ErrAudienceRequired = errors.New("Audience does not match requirements")
 )
 
-func ValidateToken() {
-
-}
-
 func ValidateTokenRequest(audience string, v *revel.Validation) error {
 	v.Required(audience)
 	v.MaxSize(audience, audienceMaxLength)
