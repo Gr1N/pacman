@@ -1,0 +1,21 @@
+/api/v1
+    # List your repositories (...)
+    /user/repos
+    # List your repositories on specified service
+    /user/repos/:service
+    # Get your repository
+    /user/repos/:service/:repo
+    # Get your repository dependencies
+    /user/repos/:service/:repo/deps
+
+    # List user public repositories (...)
+    /users/:username/repos
+    # List user public repositories on specified service
+    /users/:username/repos/:service
+    # Get user public repository
+    /users/:username/repos/:service/:repo
+    # Get user public repository dependencies
+    /users/:username/repos/:service/:repo/deps
+
+    # Get package
+    /packages/:language/:pkg
