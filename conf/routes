@@ -15,12 +15,13 @@ POST    /logout                                 Auth.Logout
 
 # Settings
 POST    /settings/tokens                        Token.Create
-GET     /settings/tokens                        Token.GetAll
-GET     /settings/tokens/:id                    Token.Get
+GET     /settings/tokens                        Token.FetchAll
+GET     /settings/tokens/:id                    Token.Fetch
 DELETE  /settings/tokens/:id                    Token.Delete
 
 # API v1
-GET     /api/v1/user/repos/:service             Repo.GetAll
+GET     /api/v1/user/repos/:service             Repo.FetchAll
+GET     /api/v1/user/repos/:service/:repo       Repo.Fetch
 PATCH   /api/v1/user/repos/:service             Repo.UpdateAll
 
 # Ignore favicon requests

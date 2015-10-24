@@ -17,12 +17,12 @@ type repoItemAttrs struct {
 	Description string `json:"desciption"`
 	Private     bool   `json:"private"`
 	Fork        bool   `json:"fork"`
-	URL         string `json:"url"`
+	RepoURL     string `json:"repo_url"`
 	Homepage    string `json:"homepage"`
 	Created     int64  `json:"created"`
 }
 
-func (c Repo) GetAll(service string) revel.Result {
+func (c Repo) FetchAll(service string) revel.Result {
 	user := c.getUser()
 	// FIXME: Handle error
 	repos, _ := models.GetUserReposByService(user.ID, service)
@@ -33,6 +33,17 @@ func (c Repo) GetAll(service string) revel.Result {
 	}
 
 	return c.RenderJSONOk(items)
+}
+
+func (c Repo) Fetch(service, repo string) revel.Result {
+	user := c.getUser()
+
+	if repo, err := models.GetUserRepoByService(user.ID, service, repo); err == nil {
+		item := c.item(repo)
+		return c.RenderJSONOk([]*jsonapi.Item{item})
+	}
+
+	return c.RenderNotFound()
 }
 
 func (c Repo) UpdateAll(service string) revel.Result {
@@ -52,7 +63,7 @@ func (c Repo) item(repo *models.Repo) *jsonapi.Item {
 			Description: repo.Description,
 			Private:     repo.Private,
 			Fork:        repo.Fork,
-			URL:         repo.URL,
+			RepoURL:     repo.RepoURL,
 			Homepage:    repo.Homepage,
 			Created:     repo.CreatedAt.Unix(),
 		},

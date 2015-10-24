@@ -28,7 +28,7 @@ type Repo struct {
 	Description string
 	Private     bool
 	Fork        bool
-	URL         string
+	RepoURL     string
 	Homepage    string
 }
 
@@ -38,7 +38,7 @@ type repoJSON struct {
 	Description string `json:"description"`
 	Private     bool   `json:"private"`
 	Fork        bool   `json:"fork"`
-	URL         string `json:"html_url"`
+	RepoURL     string `json:"html_url"`
 	Homepage    string `json:"homepage"`
 }
 
@@ -48,9 +48,9 @@ func HandleUpdate(userID int64, serviceName string) error {
 		return err
 	}
 
-	Walker := NewWalker(service.Name)
+	walker := NewWalker(service.Name)
 
-	repos, err := Walker.Repos(service.AccessToken)
+	repos, err := walker.Repos(service.AccessToken)
 	if err != nil {
 		return err
 	}
@@ -59,7 +59,7 @@ func HandleUpdate(userID int64, serviceName string) error {
 		// FIXME: Handle DB error
 		// TODO: Update repo
 		models.CreateUserRepo(service.ID, repo.Name, repo.Description,
-			repo.Private, repo.Fork, repo.URL, repo.Homepage)
+			repo.Private, repo.Fork, repo.RepoURL, repo.Homepage)
 	}
 
 	return nil
@@ -105,7 +105,7 @@ func (w Walker) Repos(accessToken string) ([]*Repo, error) {
 			Description: repoJ.Description,
 			Private:     repoJ.Private,
 			Fork:        repoJ.Fork,
-			URL:         repoJ.URL,
+			RepoURL:     repoJ.RepoURL,
 			Homepage:    repoJ.Homepage,
 		}
 	}

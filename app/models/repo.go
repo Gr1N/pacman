@@ -9,6 +9,6 @@ type Repo struct {
 	Description string
 	Private     bool
 	Fork        bool
-	URL         string
+	RepoURL     string
 	Homepage    string
 }
