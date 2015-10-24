@@ -59,6 +59,25 @@ func CreateUserToken(id int64, audience, value string) (*Token, error) {
 	return &token, nil
 }
 
+func CreateUserRepo(serviceID int64, name, description string, private, fork bool,
+	url, homepage string) (*Repo, error) {
+
+	repo := Repo{
+		ServiceID:   serviceID,
+		Name:        name,
+		Description: description,
+		Private:     private,
+		Fork:        fork,
+		URL:         url,
+		Homepage:    homepage,
+	}
+	if err := g.DB.Create(&repo).Error; err != nil {
+		return nil, err
+	}
+
+	return &repo, nil
+}
+
 func GetUserByID(id int64) (*User, error) {
 	var user User
 	if g.DB.First(&user, id).RecordNotFound() {
@@ -101,6 +120,18 @@ func GetUserByToken(value string) (*User, error) {
 	return &user, nil
 }
 
+func GetUserService(id int64, serviceName string) (*Service, error) {
+	var service Service
+	if g.DB.Where(&Service{
+		UserID: id,
+		Name:   serviceName,
+	}).First(&service).RecordNotFound() {
+		return nil, ErrServiceNotExist
+	}
+
+	return &service, nil
+}
+
 func GetUserTokens(id int64) ([]*Token, error) {
 	var tokens []*Token
 	if err := g.DB.Find(&tokens, "user_id = ?", id).Error; err != nil {
@@ -117,6 +148,23 @@ func GetUserToken(id, tokenID int64) (*Token, error) {
 	}
 
 	return &token, nil
+}
+
+func GetUserReposByService(id int64, serviceName string) ([]*Repo, error) {
+	var service Service
+	if g.DB.Where(&Service{
+		UserID: id,
+		Name:   serviceName,
+	}).First(&service).RecordNotFound() {
+		return nil, ErrServiceNotExist
+	}
+
+	var repos []*Repo
+	if err := g.DB.Find(&repos, "service_id = ?", service.ID).Error; err != nil {
+		return nil, err
+	}
+
+	return repos, nil
 }
 
 // ATTENTION: Use it only in tests

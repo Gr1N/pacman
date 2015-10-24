@@ -14,5 +14,6 @@ func initDB() {
 	dbm.AutoMigrate(
 		&models.User{},
 		&models.Service{},
-		&models.Token{})
+		&models.Token{},
+		&models.Repo{})
 }

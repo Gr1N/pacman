@@ -19,6 +19,10 @@ GET     /settings/tokens                        Token.GetAll
 GET     /settings/tokens/:id                    Token.Get
 DELETE  /settings/tokens/:id                    Token.Delete
 
+# API v1
+GET     /api/v1/user/repos/:service             Repo.GetAll
+PATCH   /api/v1/user/repos/:service             Repo.UpdateAll
+
 # Ignore favicon requests
 GET     /favicon.ico                            404
 
