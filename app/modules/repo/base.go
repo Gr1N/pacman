@@ -2,10 +2,6 @@ package repo
 
 import (
 	"errors"
-	"net/http"
-	"strings"
-
-	"github.com/franela/goreq"
 
 	"github.com/Gr1N/pacman/app/models"
 )
@@ -15,12 +11,8 @@ var (
 	ErrReposResponseInvalid = errors.New("Got invalid repos response")
 )
 
-type Walker struct {
-	Endpoint Endpoint
-}
-
-type Endpoint struct {
-	RepoURL string
+type walker interface {
+	repos(accessToken string) ([]*Repo, error)
 }
 
 type Repo struct {
@@ -32,14 +24,10 @@ type Repo struct {
 	Homepage    string
 }
 
-// FIXME: Supports only GitHub repos response
-type repoJSON struct {
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	Private     bool   `json:"private"`
-	Fork        bool   `json:"fork"`
-	RepoURL     string `json:"html_url"`
-	Homepage    string `json:"homepage"`
+func newWalker(serviceName string) walker {
+	return map[string]func() walker{
+		"github": newGitHub,
+	}[serviceName]()
 }
 
 func HandleUpdate(userID int64, serviceName string) error {
@@ -48,9 +36,9 @@ func HandleUpdate(userID int64, serviceName string) error {
 		return err
 	}
 
-	walker := NewWalker(service.Name)
+	walker := newWalker(service.Name)
 
-	repos, err := walker.Repos(service.AccessToken)
+	repos, err := walker.repos(service.AccessToken)
 	if err != nil {
 		return err
 	}
@@ -63,52 +51,4 @@ func HandleUpdate(userID int64, serviceName string) error {
 	}
 
 	return nil
-}
-
-func NewWalker(serviceName string) *Walker {
-	return map[string]func() *Walker{
-		"github": newGitHubWalker,
-	}[serviceName]()
-}
-
-func (w Walker) Repos(accessToken string) ([]*Repo, error) {
-	authorization := strings.Join([]string{
-		"token",
-		accessToken,
-	}, " ")
-	resp, err := goreq.Request{
-		Method:      "GET",
-		Uri:         w.Endpoint.RepoURL,
-		ContentType: "application/json",
-		Accept:      "application/json",
-	}.WithHeader("Authorization", authorization).Do()
-	if err != nil {
-		return nil, err
-	}
-
-	defer resp.Body.Close()
-
-	if status := resp.StatusCode; status != http.StatusOK {
-		return nil, ErrAccessTokenInvalid
-	}
-
-	var reposJ []*repoJSON
-	if err := resp.Body.FromJsonTo(&reposJ); err != nil {
-		return nil, ErrReposResponseInvalid
-	}
-
-	repos := make([]*Repo, len(reposJ))
-	for i := range reposJ {
-		repoJ := reposJ[i]
-		repos[i] = &Repo{
-			Name:        repoJ.Name,
-			Description: repoJ.Description,
-			Private:     repoJ.Private,
-			Fork:        repoJ.Fork,
-			RepoURL:     repoJ.RepoURL,
-			Homepage:    repoJ.Homepage,
-		}
-	}
-
-	return repos, nil
 }
