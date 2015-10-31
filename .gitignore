@@ -24,11 +24,6 @@ _testmain.go
 *.test
 *.prof
 
-# Revel
-test-results/
-tmp/
-routes/
-
 
 ### OSX ###
 .DS_Store
