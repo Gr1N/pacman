@@ -11,10 +11,14 @@ const (
 	gitHubRepoURL = "https://api.github.com/user/repos"
 )
 
-type gitHub struct{}
+type gitHub struct {
+	AccessToken string
+}
 
-func newGitHub() walker {
-	return &gitHub{}
+func newGitHub(accessToken string) walker {
+	return &gitHub{
+		AccessToken: accessToken,
+	}
 }
 
 type gitHubRepoJSON struct {
@@ -26,10 +30,10 @@ type gitHubRepoJSON struct {
 	Homepage    string `json:"homepage"`
 }
 
-func (w *gitHub) repos(accessToken string) ([]*Repo, error) {
+func (w *gitHub) repos() ([]*Repo, error) {
 	authorization := strings.Join([]string{
 		"token",
-		accessToken,
+		w.AccessToken,
 	}, " ")
 	resp, err := goreq.Request{
 		Method:      "GET",
@@ -66,4 +70,8 @@ func (w *gitHub) repos(accessToken string) ([]*Repo, error) {
 	}
 
 	return repos, nil
+}
+
+func (w *gitHub) repoDeps(name string) {
+
 }

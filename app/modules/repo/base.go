@@ -12,7 +12,8 @@ var (
 )
 
 type walker interface {
-	repos(accessToken string) ([]*Repo, error)
+	repos() ([]*Repo, error)
+	repoDeps(string)
 }
 
 type Repo struct {
@@ -24,10 +25,10 @@ type Repo struct {
 	Homepage    string
 }
 
-func newWalker(serviceName string) walker {
-	return map[string]func() walker{
+func newWalker(serviceName, serviceAccessToken string) walker {
+	return map[string]func(string) walker{
 		"github": newGitHub,
-	}[serviceName]()
+	}[serviceName](serviceAccessToken)
 }
 
 func HandleUpdate(userID int64, serviceName string) error {
@@ -36,9 +37,9 @@ func HandleUpdate(userID int64, serviceName string) error {
 		return err
 	}
 
-	walker := newWalker(service.Name)
+	walker := newWalker(service.Name, service.AccessToken)
 
-	repos, err := walker.repos(service.AccessToken)
+	repos, err := walker.repos()
 	if err != nil {
 		return err
 	}
@@ -51,4 +52,8 @@ func HandleUpdate(userID int64, serviceName string) error {
 	}
 
 	return nil
+}
+
+func HandleUpdateDeps(userID int64, serviceName, repoName string) {
+
 }
