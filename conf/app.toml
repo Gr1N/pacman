@@ -1,0 +1,7 @@
+# WARNING: Never ever modify this file
+
+# Supported modes: release, debug and test
+run_mode = "release"
+
+[server]
+port = "4242"
