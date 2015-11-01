@@ -7,7 +7,8 @@ import (
 )
 
 func Init(g *gin.Engine) {
-	h := g.Group("/__health")
+	// Health check group.
+	h := g.Group("/h")
 	{
 		h.GET("/ping", health.Ping)
 	}
