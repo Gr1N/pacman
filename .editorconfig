@@ -17,6 +17,6 @@ insert_final_newline = true
 [*.go]
 indent_style = tab
 
-[*.{ini,raml,json,html}]
+[*.{ini,toml,raml,json,html}]
 indent_style = space
 indent_size = 2

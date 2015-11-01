@@ -12,8 +12,13 @@ var (
 type s struct {
 	RunMode string `toml:"run_mode"`
 
+	Logger logger
 	Server server
 	DB     db
+}
+
+type logger struct {
+	MinLevel string `toml:"min_level"`
 }
 
 type server struct {

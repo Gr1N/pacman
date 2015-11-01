@@ -7,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/Gr1N/pacman/models"
+	"github.com/Gr1N/pacman/modules/logger"
 	"github.com/Gr1N/pacman/modules/settings"
 	"github.com/Gr1N/pacman/routers"
 )
@@ -20,6 +21,7 @@ var CmdServer = cli.Command{
 
 func runServer(ctx *cli.Context) {
 	settings.Init()
+	logger.Init()
 	models.Init()
 
 	g := initGin()

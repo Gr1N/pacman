@@ -3,6 +3,9 @@
 # Supported modes: release, debug and test
 run_mode = "release"
 
+[logger]
+min_level = "warn"
+
 [server]
 port = "4242"
 
