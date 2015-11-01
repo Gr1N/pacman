@@ -36,6 +36,7 @@ func initGin() *gin.Engine {
 	g := gin.New()
 
 	g.Use(gin.Recovery(), gin.Logger())
+	g.LoadHTMLGlob("templates/*")
 
 	return g
 }

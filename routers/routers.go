@@ -7,6 +7,9 @@ import (
 )
 
 func Init(g *gin.Engine) {
+	// Home page.
+	g.GET("/", Home)
+
 	// Health check group.
 	h := g.Group("/h")
 	{
