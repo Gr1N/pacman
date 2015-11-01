@@ -13,10 +13,19 @@ type s struct {
 	RunMode string `toml:"run_mode"`
 
 	Server server
+	DB     db
 }
 
 type server struct {
 	Port string
+}
+
+type db struct {
+	Driver       string
+	Spec         string
+	MaxIdleConns int  `toml:"max_idle_conns"`
+	MaxOpenConns int  `toml:"max_open_conns"`
+	LogMode      bool `toml:"log_mode"`
 }
 
 // Init initializes application settings.

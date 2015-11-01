@@ -5,3 +5,10 @@ run_mode = "release"
 
 [server]
 port = "4242"
+
+[db]
+driver = "postgres"
+spec = "user=pman dbname=pman sslmode=disable"
+max_idle_conns = 10
+max_open_conns = 100
+log_mode = false
