@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/Gr1N/pacman/modules/auth"
+	"github.com/Gr1N/pacman/modules/helpers"
 	"github.com/Gr1N/pacman/modules/session"
 )
 
@@ -27,7 +28,7 @@ func SignIn(c *gin.Context) {
 func SignInPost(c *gin.Context) {
 	service := c.Param("service")
 	if err := auth.HandleService(service); err != nil {
-		c.Redirect(http.StatusFound, "/user/signin")
+		helpers.RedirectToSignIn(c)
 		return
 	}
 
@@ -41,31 +42,31 @@ func SignInPost(c *gin.Context) {
 func SignInComplete(c *gin.Context) {
 	service := c.Param("service")
 	if err := auth.HandleService(service); err != nil {
-		c.Redirect(http.StatusFound, "/user/signin")
+		helpers.RedirectToSignIn(c)
 		return
 	}
 
 	var b signInCompleteBinding
 	if err := c.Bind(&b); err != nil {
-		c.Redirect(http.StatusFound, "/user/signin")
+		helpers.RedirectToSignIn(c)
 		return
 	}
 
 	sessionObj := session.Get(c)
 	sessionID := session.ID(sessionObj)
 	if err := auth.ValidateAuthorizeRequest(service, sessionID, b.State); err != nil {
-		c.Redirect(http.StatusFound, "/user/signin")
+		helpers.RedirectToSignIn(c)
 		return
 	}
 
 	user, err := auth.FinishAuthorizeRequest(service, b.Code)
 	if err != nil {
-		c.Redirect(http.StatusFound, "/user/signin")
+		helpers.RedirectToSignIn(c)
 		return
 	}
 
 	sessionObj.Clear()
 	session.SetUserID(sessionObj, user.ID)
 
-	c.Redirect(http.StatusFound, "/")
+	helpers.RedirectToHome(c)
 }
