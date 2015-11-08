@@ -10,15 +10,17 @@ import (
 )
 
 var (
-	db *gorm.DB
+	g *gorm.DB
 )
 
+// Model represents base model.
 type Model struct {
 	ID        int64 `gorm:"primary_key"`
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
 
+// Init initializes application models.
 func Init() {
 	dbm, err := gorm.Open(settings.S.DB.Driver, settings.S.DB.Spec)
 	if err != nil {
@@ -32,7 +34,8 @@ func Init() {
 	// dbm.SetLogger()
 
 	dbm.AutoMigrate(
-		&User{})
+		&User{},
+		&Service{})
 
-	db = &dbm
+	g = &dbm
 }

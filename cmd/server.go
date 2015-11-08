@@ -7,7 +7,10 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/Gr1N/pacman/models"
+	"github.com/Gr1N/pacman/modules/auth"
+	"github.com/Gr1N/pacman/modules/cache"
 	"github.com/Gr1N/pacman/modules/logger"
+	"github.com/Gr1N/pacman/modules/session"
 	"github.com/Gr1N/pacman/modules/settings"
 	"github.com/Gr1N/pacman/routers"
 )
@@ -20,19 +23,8 @@ var CmdServer = cli.Command{
 }
 
 func runServer(ctx *cli.Context) {
-	settings.Init()
-	logger.Init()
-	models.Init()
+	preInit()
 
-	g := initGin()
-
-	routers.Init(g)
-
-	port := strings.Join([]string{"", settings.S.Server.Port}, ":")
-	g.Run(port)
-}
-
-func initGin() *gin.Engine {
 	gin.SetMode(settings.S.RunMode)
 
 	g := gin.New()
@@ -40,5 +32,21 @@ func initGin() *gin.Engine {
 	g.Use(gin.Recovery(), gin.Logger())
 	g.LoadHTMLGlob("templates/*")
 
-	return g
+	postInit(g)
+
+	port := strings.Join([]string{"", settings.S.Server.Port}, ":")
+	g.Run(port)
+}
+
+func preInit() {
+	settings.Init()
+	logger.Init()
+	cache.Init()
+	models.Init()
+	auth.Init()
+}
+
+func postInit(g *gin.Engine) {
+	session.Init(g)
+	routers.Init(g)
 }

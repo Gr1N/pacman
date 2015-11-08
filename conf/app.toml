@@ -2,6 +2,7 @@
 
 # Supported modes: release, debug and test
 run_mode = "release"
+secret = "cdoY0vOptmCiwMDSjmlR8vurVxNRkjcmxyhleCl9yjoscz3yxhwl1YfCAkSRULsp"
 
 [logger]
 min_level = "warn"
@@ -15,3 +16,20 @@ spec = "user=pman dbname=pman sslmode=disable"
 max_idle_conns = 10
 max_open_conns = 100
 log_mode = false
+
+[cache]
+host = ""
+password = ""
+default_expiration = "1h"
+
+[auth]
+enabled_services = [
+  "github",
+]
+
+github_client_id = ""
+github_client_secret = ""
+github_redirect_url = ""
+github_scopes = []
+
+state_cache_timeout = "10m"

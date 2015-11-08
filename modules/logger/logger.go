@@ -11,6 +11,7 @@ import (
 	"github.com/Gr1N/pacman/modules/settings"
 )
 
+// Init initializes application logger.
 func Init() {
 	filter := &logutils.LevelFilter{
 		Levels:   []logutils.LogLevel{"debug", "warn", "error"},
