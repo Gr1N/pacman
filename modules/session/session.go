@@ -1,6 +1,8 @@
 package session
 
 import (
+	"strconv"
+
 	"github.com/gin-gonic/contrib/sessions"
 	"github.com/gin-gonic/gin"
 
@@ -10,6 +12,7 @@ import (
 
 const (
 	sessionIDKey = "session_id"
+	userIDKey    = "user_id"
 )
 
 // Init initializes application session.
@@ -35,4 +38,21 @@ func ID(s sessions.Session) string {
 	s.Save()
 
 	return id
+}
+
+// UserID returns User ID saved in session.
+func UserID(s sessions.Session) (int64, bool) {
+	if rawID := s.Get(userIDKey); rawID != nil {
+		if userID, err := strconv.ParseInt(rawID.(string), 10, 64); err == nil {
+			return userID, true
+		}
+	}
+
+	return -1, false
+}
+
+// SetUserID saves User ID in session.
+func SetUserID(s sessions.Session, userID int64) {
+	s.Set(userIDKey, strconv.FormatInt(userID, 10))
+	s.Save()
 }

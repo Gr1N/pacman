@@ -6,7 +6,6 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/Gr1N/pacman/modules/auth"
-	"github.com/Gr1N/pacman/modules/logger"
 	"github.com/Gr1N/pacman/modules/session"
 )
 
@@ -19,10 +18,12 @@ type signInCompleteBinding struct {
 	Code  string `form:"code" binding:"required,len=20"`
 }
 
+// SignIn renders sign in page.
 func SignIn(c *gin.Context) {
 	c.HTML(http.StatusOK, signInTmpl, gin.H{})
 }
 
+// SignInPost starts authentication process.
 func SignInPost(c *gin.Context) {
 	service := c.Param("service")
 	if err := auth.HandleService(service); err != nil {
@@ -36,6 +37,7 @@ func SignInPost(c *gin.Context) {
 	c.Redirect(http.StatusFound, redirectURL)
 }
 
+// SignInComplete finishes authentication process.
 func SignInComplete(c *gin.Context) {
 	service := c.Param("service")
 	if err := auth.HandleService(service); err != nil {
@@ -49,14 +51,21 @@ func SignInComplete(c *gin.Context) {
 		return
 	}
 
-	sessionID := session.ID(session.Get(c))
+	sessionObj := session.Get(c)
+	sessionID := session.ID(sessionObj)
 	if err := auth.ValidateAuthorizeRequest(service, sessionID, b.State); err != nil {
 		c.Redirect(http.StatusFound, "/user/signin")
 		return
 	}
 
-	logger.Debug(b.State)
-	logger.Debug(b.Code)
+	user, err := auth.FinishAuthorizeRequest(service, b.Code)
+	if err != nil {
+		c.Redirect(http.StatusFound, "/user/signin")
+		return
+	}
 
-	auth.FinishAuthorizeRequest(service, b.Code)
+	sessionObj.Clear()
+	session.SetUserID(sessionObj, user.ID)
+
+	c.Redirect(http.StatusFound, "/")
 }
