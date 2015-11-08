@@ -5,6 +5,16 @@
     <title>PMan</title>
   </head>
   <body>
-    <h1>Hi!</h1>
+    <h1>Hi! </h1>
+    {{if .user}}
+    <p>User {{.user.ID}}</p>
+    <form action="/user/signout/" method="POST">
+      <input value="SignOut" type="submit">
+    </form>
+    {{else}}
+    <form action="/user/signin/" method="GET">
+      <input value="SignIn" type="submit">
+    </form>
+    {{end}}
   </body>
 </html>

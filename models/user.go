@@ -36,6 +36,16 @@ func CreateUserByService(serviceName, serviceAccessToken string, userServiceID i
 	return &user, nil
 }
 
+// GetUserByID returns the user object by given id if exists.
+func GetUserByID(id int64) (*User, error) {
+	var user User
+	if g.First(&user, id).RecordNotFound() {
+		return nil, errUserNotExist
+	}
+
+	return &user, nil
+}
+
 // GetUserByService returns the user object by given service if exists.
 func GetUserByService(serviceName string, userServiceID int64) (*User, error) {
 	var service Service
