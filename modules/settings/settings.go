@@ -14,15 +14,10 @@ type s struct {
 	RunMode string `toml:"run_mode"`
 	Secret  string
 
-	Logger logger
 	Server server
 	DB     db
 	Cache  cache
-	Auth   auth
-}
-
-type logger struct {
-	MinLevel string `toml:"min_level"`
+	OAuth2 oauth2
 }
 
 type server struct {
@@ -43,7 +38,7 @@ type cache struct {
 	DefaultExpiration string `toml:"default_expiration"`
 }
 
-type auth struct {
+type oauth2 struct {
 	EnabledServices []string `toml:"enabled_services"`
 
 	GitHubClientID     string   `toml:"github_client_id"`

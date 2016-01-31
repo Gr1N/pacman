@@ -1,16 +1,13 @@
-package auth
+package oauth2
 
 import (
-	"crypto/subtle"
 	"strings"
 	"time"
 
 	"github.com/Unknwon/com"
 
 	"github.com/Gr1N/pacman/models"
-	"github.com/Gr1N/pacman/modules/auth/oauth2"
 	"github.com/Gr1N/pacman/modules/cache"
-	"github.com/Gr1N/pacman/modules/errors"
 	"github.com/Gr1N/pacman/modules/helpers"
 	"github.com/Gr1N/pacman/modules/settings"
 )
@@ -20,24 +17,19 @@ const (
 )
 
 var (
-	gitHub            *oauth2.Config
-	supportedServices map[string]*oauth2.Config
+	gitHub            *Config
+	supportedServices map[string]*Config
 	stateCacheTimeout time.Duration
-
-	errServiceNotSupported = errors.New(
-		"authorization_service_not_supported", "Specified service is not supported")
-	errStateInvalid = errors.New(
-		"state_invalid", "State value is not valid")
 )
 
-// Init initializes auth module.
+// Init initializes oauth2 module.
 func Init() {
-	auths := settings.S.Auth
+	auths := settings.S.OAuth2
 
-	gitHub = oauth2.NewGitHub(auths.GitHubClientID, auths.GitHubClientSecret,
+	gitHub = NewGitHub(auths.GitHubClientID, auths.GitHubClientSecret,
 		auths.GitHubRedirectURL, auths.GitHubScopes)
 
-	supportedServices = map[string]*oauth2.Config{
+	supportedServices = map[string]*Config{
 		"github": gitHub,
 	}
 	stateCacheTimeout, _ = time.ParseDuration(auths.StateCacheTimeout)
@@ -45,7 +37,7 @@ func Init() {
 
 // HandleService validates that service name is valid and allowed.
 func HandleService(serviceName string) error {
-	if !com.IsSliceContainsStr(settings.S.Auth.EnabledServices, serviceName) {
+	if !com.IsSliceContainsStr(settings.S.OAuth2.EnabledServices, serviceName) {
 		return errServiceNotSupported
 	}
 
@@ -53,21 +45,16 @@ func HandleService(serviceName string) error {
 }
 
 // HandleAuthorizeRequest generates authorization URL for specified service.
-func HandleAuthorizeRequest(serviceName, sessionID string) string {
-	state := issueState(serviceName, sessionID)
+func HandleAuthorizeRequest(serviceName string) string {
+	state := issueState(serviceName)
 	service := supportedServices[serviceName]
 
 	return service.AuthCodeURL(state)
 }
 
 // ValidateAuthorizeRequest validates that state value is valid.
-func ValidateAuthorizeRequest(serviceName, sessionID, state string) error {
-	cachedState, err := retriveState(serviceName, sessionID)
-	if err != nil {
-		return errStateInvalid
-	}
-
-	if eq := subtle.ConstantTimeCompare([]byte(state), []byte(cachedState)); eq != 1 {
+func ValidateAuthorizeRequest(serviceName, state string) error {
+	if !verifyState(serviceName, state) {
 		return errStateInvalid
 	}
 
@@ -97,31 +84,35 @@ func FinishAuthorizeRequest(serviceName, code string) (*models.User, error) {
 	return user, nil
 }
 
-func issueState(serviceName, sessionID string) string {
+func issueState(serviceName string) string {
 	state := helpers.RandomString(stateLength)
 
-	key := makeStateCacheKey(serviceName, sessionID)
-	go cache.Set(key, state, stateCacheTimeout)
+	key := makeStateCacheKey(state)
+	go cache.Set(key, serviceName, stateCacheTimeout)
 
 	return state
 }
 
-func retriveState(serviceName, sessionID string) (string, error) {
-	var state string
+func verifyState(serviceName, state string) bool {
+	var cachedServiceName string
 
-	key := makeStateCacheKey(serviceName, sessionID)
-	if err := cache.Get(key, &state); err != nil {
-		return "", err
+	key := makeStateCacheKey(state)
+	if err := cache.Get(key, &cachedServiceName); err != nil {
+		return false
 	}
 
 	go cache.Delete(key)
 
-	return state, nil
+	if cachedServiceName != serviceName {
+		return false
+	}
+
+	return true
 }
 
-func makeStateCacheKey(serviceName, sessionID string) string {
+func makeStateCacheKey(state string) string {
 	return strings.Join([]string{
-		sessionID,
-		serviceName,
+		"auth",
+		state,
 	}, ":")
 }

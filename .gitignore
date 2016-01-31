@@ -74,4 +74,3 @@ sftp-config.json
 ### Other ###
 conf/app_local.toml
 docs/draft.html
-gin-bin

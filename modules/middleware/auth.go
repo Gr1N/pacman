@@ -1,11 +1,12 @@
 package middleware
 
 import (
+	"net/http"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 
 	"github.com/Gr1N/pacman/models"
-	"github.com/Gr1N/pacman/modules/helpers"
-	"github.com/Gr1N/pacman/modules/session"
 )
 
 const (
@@ -18,9 +19,13 @@ const (
 // and if user found attaches user object to the context.
 func UserFromCookie() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		if userID, exists := session.UserID(session.Get(c)); exists {
-			if user, err := models.GetUserByID(userID); err == nil {
-				c.Set(ContextUserKey, user)
+		if values, _ := c.Request.Header["Authorization"]; len(values) > 0 {
+			auth := strings.Split(values[0], " ")
+			if len(auth) == 2 && strings.ToLower(auth[0]) == "token" {
+				token := auth[1]
+				if user, err := models.GetUserByToken(token); err == nil {
+					c.Set(ContextUserKey, user)
+				}
 			}
 		}
 	}
@@ -31,7 +36,7 @@ func UserFromCookie() gin.HandlerFunc {
 func Authenticated() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		if _, exists := c.Get(ContextUserKey); !exists {
-			helpers.RedirectToSignIn(c)
+			c.JSON(http.StatusForbidden, gin.H{})
 			c.Abort()
 		}
 	}
@@ -42,7 +47,7 @@ func Authenticated() gin.HandlerFunc {
 func NotAuthenticated() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		if _, exists := c.Get(ContextUserKey); exists {
-			helpers.RedirectToHome(c)
+			c.JSON(http.StatusForbidden, gin.H{})
 			c.Abort()
 		}
 	}

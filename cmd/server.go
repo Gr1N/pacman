@@ -7,10 +7,8 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/Gr1N/pacman/models"
-	"github.com/Gr1N/pacman/modules/auth"
 	"github.com/Gr1N/pacman/modules/cache"
-	"github.com/Gr1N/pacman/modules/logger"
-	"github.com/Gr1N/pacman/modules/session"
+	"github.com/Gr1N/pacman/modules/oauth2"
 	"github.com/Gr1N/pacman/modules/settings"
 	"github.com/Gr1N/pacman/routers"
 )
@@ -30,7 +28,6 @@ func runServer(ctx *cli.Context) {
 	g := gin.New()
 
 	g.Use(gin.Recovery(), gin.Logger())
-	g.LoadHTMLGlob("templates/*")
 
 	postInit(g)
 
@@ -40,13 +37,11 @@ func runServer(ctx *cli.Context) {
 
 func preInit() {
 	settings.Init()
-	logger.Init()
 	cache.Init()
 	models.Init()
-	auth.Init()
+	oauth2.Init()
 }
 
 func postInit(g *gin.Engine) {
-	session.Init(g)
 	routers.Init(g)
 }

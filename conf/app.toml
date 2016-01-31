@@ -4,9 +4,6 @@
 run_mode = "release"
 secret = "cdoY0vOptmCiwMDSjmlR8vurVxNRkjcmxyhleCl9yjoscz3yxhwl1YfCAkSRULsp"
 
-[logger]
-min_level = "warn"
-
 [server]
 port = "4242"
 
@@ -22,7 +19,7 @@ host = ""
 password = ""
 default_expiration = "1h"
 
-[auth]
+[oauth2]
 enabled_services = [
   "github",
 ]

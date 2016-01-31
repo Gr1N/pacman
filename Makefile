@@ -1,7 +1,7 @@
-.PHONY: runserver
+.PHONY: runserver runinspection
 
 runserver:
-	gin --immediate run server
+	go run pman.go server
 
 runinspection:
 	go tool vet .

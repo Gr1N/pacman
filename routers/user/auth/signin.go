@@ -2,16 +2,12 @@ package auth
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/Gr1N/pacman/modules/auth"
-	"github.com/Gr1N/pacman/modules/helpers"
-	"github.com/Gr1N/pacman/modules/session"
-)
-
-const (
-	signInTmpl = "user.auth.signin.tmpl"
+	"github.com/Gr1N/pacman/models"
+	"github.com/Gr1N/pacman/modules/oauth2"
 )
 
 type signInCompleteBinding struct {
@@ -19,54 +15,52 @@ type signInCompleteBinding struct {
 	Code  string `form:"code" binding:"required,len=20"`
 }
 
-// SignIn renders sign in page.
+// SignIn starts authentication process.
 func SignIn(c *gin.Context) {
-	c.HTML(http.StatusOK, signInTmpl, gin.H{})
-}
-
-// SignInPost starts authentication process.
-func SignInPost(c *gin.Context) {
 	service := c.Param("service")
-	if err := auth.HandleService(service); err != nil {
-		helpers.RedirectToSignIn(c)
+	if err := oauth2.HandleService(service); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{})
 		return
 	}
 
-	sessionID := session.ID(session.Get(c))
-	redirectURL := auth.HandleAuthorizeRequest(service, sessionID)
+	redirectURL := oauth2.HandleAuthorizeRequest(service)
 
-	c.Redirect(http.StatusFound, redirectURL)
+	c.JSON(http.StatusOK, gin.H{
+		"redirectURL": redirectURL,
+	})
 }
 
 // SignInComplete finishes authentication process.
 func SignInComplete(c *gin.Context) {
 	service := c.Param("service")
-	if err := auth.HandleService(service); err != nil {
-		helpers.RedirectToSignIn(c)
+	if err := oauth2.HandleService(service); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{})
 		return
 	}
 
 	var b signInCompleteBinding
 	if err := c.Bind(&b); err != nil {
-		helpers.RedirectToSignIn(c)
+		c.JSON(http.StatusBadRequest, gin.H{})
 		return
 	}
 
-	sessionObj := session.Get(c)
-	sessionID := session.ID(sessionObj)
-	if err := auth.ValidateAuthorizeRequest(service, sessionID, b.State); err != nil {
-		helpers.RedirectToSignIn(c)
+	if err := oauth2.ValidateAuthorizeRequest(service, b.State); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{})
 		return
 	}
 
-	user, err := auth.FinishAuthorizeRequest(service, b.Code)
+	user, err := oauth2.FinishAuthorizeRequest(service, b.Code)
 	if err != nil {
-		helpers.RedirectToSignIn(c)
+		c.JSON(http.StatusBadRequest, gin.H{})
 		return
 	}
 
-	sessionObj.Clear()
-	session.SetUserID(sessionObj, user.ID)
+	token, _ := models.CreateUserToken(user.ID, "Auth "+time.Now().String())
 
-	helpers.RedirectToHome(c)
+	c.JSON(http.StatusOK, gin.H{
+		"user": gin.H{
+			"id":    user.ID,
+			"token": token.Value,
+		},
+	})
 }

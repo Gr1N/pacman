@@ -27,15 +27,8 @@ func Init(g *gin.Engine) {
 		usin := u.Group("/signin")
 		usin.Use(middleware.NotAuthenticated())
 		{
-			usin.GET("/", auth.SignIn)
-			usin.POST("/:service", auth.SignInPost)
+			usin.POST("/:service", auth.SignIn)
 			usin.GET("/:service/complete", auth.SignInComplete)
-		}
-
-		usout := u.Group("/signout")
-		usout.Use(middleware.Authenticated())
-		{
-			usout.POST("/", auth.SignOut)
 		}
 	}
 }

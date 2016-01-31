@@ -1,7 +1,10 @@
 package models
 
 import (
+	"github.com/pborman/uuid"
+
 	"github.com/Gr1N/pacman/modules/errors"
+	"github.com/Gr1N/pacman/modules/helpers"
 )
 
 var (
@@ -13,6 +16,7 @@ var (
 type User struct {
 	Model
 
+	Tokens   []Token
 	Services []Service
 }
 
@@ -34,6 +38,24 @@ func CreateUserByService(serviceName, serviceAccessToken string, userServiceID i
 	}
 
 	return &user, nil
+}
+
+// CreateUserToken creates record of a new authentication token for user
+// with specified `audience`.
+func CreateUserToken(id int64, audience string) (*Token, error) {
+	value := uuid.NewRandom().String()
+	value = helpers.EncodeSha1(value)
+
+	token := Token{
+		UserID:   id,
+		Audience: audience,
+		Value:    value,
+	}
+	if err := g.Create(&token).Error; err != nil {
+		return nil, err
+	}
+
+	return &token, nil
 }
 
 // GetUserByID returns the user object by given id if exists.
@@ -58,6 +80,23 @@ func GetUserByService(serviceName string, userServiceID int64) (*User, error) {
 
 	var user User
 	if g.Model(&service).Related(&user).RecordNotFound() {
+		return nil, errUserNotExist
+	}
+
+	return &user, nil
+}
+
+// GetUserByToken returns the user object by given token value if exists.
+func GetUserByToken(value string) (*User, error) {
+	var token Token
+	if g.Where(&Token{
+		Value: value,
+	}).First(&token).RecordNotFound() {
+		return nil, errUserTokenNotExist
+	}
+
+	var user User
+	if g.Model(&token).Related(&user).RecordNotFound() {
 		return nil, errUserNotExist
 	}
 
