@@ -5,14 +5,12 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/Gr1N/pacman/models"
 	"github.com/Gr1N/pacman/modules/middleware"
 )
 
 // Home returns context for front-end initialization.
 func Home(c *gin.Context) {
-	userR, _ := c.Get(middleware.ContextUserKey)
-	user := userR.(*models.User)
+	user := middleware.UserFromContext(c)
 
 	c.JSON(http.StatusOK, gin.H{
 		"user": gin.H{

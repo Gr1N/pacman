@@ -10,7 +10,7 @@ import (
 
 // Init initializes application routers.
 func Init(g *gin.Engine) {
-	g.Use(middleware.UserFromCookie())
+	g.Use(middleware.UserFromToken())
 
 	// Home page.
 	g.GET("/", Home)

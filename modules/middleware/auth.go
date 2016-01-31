@@ -15,9 +15,9 @@ const (
 	ContextUserKey = "user"
 )
 
-// UserFromCookie reads cookie, tries to find user in database
+// UserFromToken reads `Authorization` header, tries to find user in database
 // and if user found attaches user object to the context.
-func UserFromCookie() gin.HandlerFunc {
+func UserFromToken() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		if values, _ := c.Request.Header["Authorization"]; len(values) > 0 {
 			auth := strings.Split(values[0], " ")
@@ -29,6 +29,13 @@ func UserFromCookie() gin.HandlerFunc {
 			}
 		}
 	}
+}
+
+// UserFromContext returns the user object which attached to the context.
+func UserFromContext(c *gin.Context) *models.User {
+	user, _ := c.Get(ContextUserKey)
+
+	return user.(*models.User)
 }
 
 // Authenticated checks is user object attached to the context

@@ -1,5 +1,8 @@
 /api/v1
-    # List your repositories (...)
+    /user/signin/:service
+    /user/signin/:service/complete
+
+    # List your repositories (...) ?
     /user/repos
     # List your repositories on specified service
     /user/repos/:service
