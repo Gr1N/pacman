@@ -1,7 +1,8 @@
 .PHONY: runserver runinspection
 
 runserver:
-	go run pman.go server
+	rm pacman || true
+	go build && ./pacman server
 
 runinspection:
 	go tool vet .
