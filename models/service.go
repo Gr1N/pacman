@@ -22,4 +22,6 @@ type Service struct {
 	UserServiceID    int64 `sql:"not null;unique_index:idx_userid_userserviceid"`
 	UserServiceName  string
 	UserServiceEmail string
+
+	Repos []Repo
 }

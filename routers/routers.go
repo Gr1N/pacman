@@ -6,6 +6,7 @@ import (
 	"github.com/Gr1N/pacman/modules/middleware"
 	"github.com/Gr1N/pacman/routers/health"
 	"github.com/Gr1N/pacman/routers/user/auth"
+	"github.com/Gr1N/pacman/routers/user/repos"
 )
 
 // Init initializes application routers.
@@ -29,6 +30,13 @@ func Init(g *gin.Engine) {
 		{
 			usin.POST("/:service", auth.SignIn)
 			usin.GET("/:service/complete", auth.SignInComplete)
+		}
+
+		urepos := u.Group("/repos")
+		urepos.Use(middleware.Authenticated())
+		{
+			urepos.GET("/:service", repos.ReposList)
+			urepos.PATCH("/:service", repos.ReposUpdate)
 		}
 	}
 }

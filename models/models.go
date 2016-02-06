@@ -36,7 +36,8 @@ func Init() {
 	dbm.AutoMigrate(
 		&User{},
 		&Token{},
-		&Service{})
+		&Service{},
+		&Repo{})
 
 	g = &dbm
 }

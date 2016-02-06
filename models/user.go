@@ -102,3 +102,35 @@ func GetUserByToken(value string) (*User, error) {
 
 	return &user, nil
 }
+
+// GetUserService returns the user service object by given user id and service
+// if exists.
+func GetUserService(id int64, serviceName string) (*Service, error) {
+	var service Service
+	if g.Where(&Service{
+		UserID: id,
+		Name:   serviceName,
+	}).First(&service).RecordNotFound() {
+		return nil, errServiceNotExist
+	}
+
+	return &service, nil
+}
+
+// GetUserReposByService returns list of user repos by given user id and service
+// if exists.
+func GetUserReposByService(id int64, serviceName string) ([]*Repo, error) {
+	service, err := GetUserService(id, serviceName)
+	if err != nil {
+		return nil, err
+	}
+
+	var repos []*Repo
+	if err := g.Where(&Repo{
+		ServiceID: service.ID,
+	}).Find(&repos).Error; err != nil {
+		return nil, err
+	}
+
+	return repos, nil
+}
